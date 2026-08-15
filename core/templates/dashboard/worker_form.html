@@ -1,0 +1,82 @@
+{% extends 'dashboard/dashboard_base.html' %}
+
+{% block db_page_title %}{% if worker %}Edit Worker Profile — {{ worker.name }}{% else %}Add New Worker Profile{% endif %}{% endblock %}
+
+{% block db_content %}
+<div class="db-card-form">
+    <div style="margin-bottom: 32px;">
+        <h3><i class="fa-solid fa-user-gear" style="color: var(--clr-primary);"></i> {% if worker %}Edit Worker Profile{% else %}Register New Worker{% endif %}</h3>
+        <p style="color: var(--txt-dark-400);">Enter worker identity details, office assignment, and standard base salary.</p>
+    </div>
+
+    <form method="POST">
+        {% csrf_token %}
+
+        {% if form.errors %}
+            <div style="background-color: rgba(239, 68, 68, 0.1); border-left: 4px solid var(--clr-danger); padding: 16px; border-radius: var(--border-radius-sm); margin-bottom: 24px; color: var(--clr-danger);">
+                <p><strong>Correction required:</strong></p>
+                <ul style="margin-left: 20px; margin-top: 8px;">
+                    {% for field in form %}
+                        {% for error in field.errors %}
+                            <li>{{ field.label }}: {{ error }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        <div class="form-grid-2">
+            <div class="form-group">
+                <label for="id_name">Worker Full Name</label>
+                <input type="text" name="name" id="id_name" value="{{ form.name.value|default:'' }}" class="form-control" placeholder="E.g. Ramesh Patel" required>
+            </div>
+
+            <div class="form-group">
+                <label for="id_office">Assigned Office Branch</label>
+                <select name="office" id="id_office" class="form-control">
+                    <option value="">Select Office</option>
+                    {% for office in offices %}
+                        <option value="{{ office.id }}" {% if form.office.value == office.id or form.instance.office.id == office.id %}selected{% endif %}>{{ office.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="form-grid-2">
+            <div class="form-group">
+                <label for="id_phone">Contact Phone Number</label>
+                <input type="text" name="phone" id="id_phone" value="{{ form.phone.value|default:'' }}" class="form-control" placeholder="+91 98765 43210">
+            </div>
+
+            <div class="form-group">
+                <label for="id_email">Email Address (Optional)</label>
+                <input type="email" name="email" id="id_email" value="{{ form.email.value|default:'' }}" class="form-control" placeholder="worker@example.com">
+            </div>
+        </div>
+
+        <div class="form-grid-2">
+            <div class="form-group">
+                <label for="id_base_salary">💰 Standard Base Salary (પગાર) — INR</label>
+                <input type="number" step="0.01" name="base_salary" id="id_base_salary" value="{{ form.base_salary.value|default:'0.00' }}" class="form-control" placeholder="25000.00" required>
+            </div>
+
+            <div class="form-group">
+                <label for="id_joining_date">Joining Date</label>
+                <input type="date" name="joining_date" id="id_joining_date" value="{{ form.joining_date.value|date:'Y-m-d'|default:'' }}" class="form-control">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="id_notes">Internal Notes & Identity Proof Details</label>
+            <textarea name="notes" id="id_notes" class="form-control" placeholder="Aadhar number, bank details, emergency contacts...">{{ form.notes.value|default:'' }}</textarea>
+        </div>
+
+        <div style="display: flex; gap: 16px; margin-top: 40px; justify-content: flex-end;">
+            <a href="{% url 'worker_list' %}" class="btn btn-outline">Cancel</a>
+            <button type="submit" class="btn btn-primary" style="padding: 12px 32px;">
+                <i class="fa-solid fa-save"></i> Save Worker Profile
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

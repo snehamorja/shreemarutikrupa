@@ -1,0 +1,112 @@
+{% extends 'dashboard/dashboard_base.html' %}
+
+{% block db_page_title %}My Profile{% endblock %}
+
+{% block db_content %}
+<div class="db-card-form">
+    <div style="margin-bottom: 32px;">
+        <h3>Manage Account Credentials</h3>
+        <p style="color: var(--txt-dark-400);">Update your personal metadata information or reset your access password.</p>
+    </div>
+
+    <!-- Details Update Section -->
+    <form method="POST" action="{% url 'profile_edit' %}" class="settings-section-card">
+        {% csrf_token %}
+        <input type="hidden" name="form_type" value="profile_info">
+        
+        <h4 style="margin-bottom: 20px; color: var(--clr-primary); border-bottom: 1px solid var(--bg-light-300); padding-bottom: 8px;">
+            <i class="fa-solid fa-address-card"></i> Personal Information
+        </h4>
+
+        <div class="form-grid-2">
+            <div class="form-group">
+                <label for="id_username">Username</label>
+                <input type="text" name="username" id="id_username" class="form-control" value="{{ user.username }}" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="id_email">Email Address</label>
+                <input type="email" name="email" id="id_email" value="{{ user.email }}" class="form-control" required>
+            </div>
+        </div>
+
+        <div class="form-grid-2">
+            <div class="form-group">
+                <label for="id_first_name">First Name</label>
+                <input type="text" name="first_name" id="id_first_name" value="{{ user.first_name }}" class="form-control" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="id_last_name">Last Name</label>
+                <input type="text" name="last_name" id="id_last_name" value="{{ user.last_name }}" class="form-control" required>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="margin-top: 16px;">
+            <i class="fa-solid fa-user-check"></i> Update Personal Info
+        </button>
+    </form>
+
+    <!-- Password Reset Section -->
+    <form method="POST" action="{% url 'profile_edit' %}">
+        {% csrf_token %}
+        <input type="hidden" name="form_type" value="password_change">
+
+        <h4 style="margin-bottom: 20px; color: var(--clr-danger); border-bottom: 1px solid var(--bg-light-300); padding-bottom: 8px;">
+            <i class="fa-solid fa-lock"></i> Change Portal Password
+        </h4>
+
+        <div class="form-group">
+            <label for="id_current_password">Current Password</label>
+            <div style="position: relative;">
+                <input type="password" name="current_password" id="id_current_password" class="form-control" style="padding-right: 44px;" required>
+                <button type="button" onclick="toggleField('id_current_password', 'eye1')" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--txt-dark-400); cursor: pointer;">
+                    <i class="fa-solid fa-eye" id="eye1"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="form-grid-2">
+            <div class="form-group">
+                <label for="id_new_password">New Password</label>
+                <div style="position: relative;">
+                    <input type="password" name="new_password" id="id_new_password" class="form-control" style="padding-right: 44px;" required>
+                    <button type="button" onclick="toggleField('id_new_password', 'eye2')" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--txt-dark-400); cursor: pointer;">
+                        <i class="fa-solid fa-eye" id="eye2"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="id_confirm_password">Confirm New Password</label>
+                <div style="position: relative;">
+                    <input type="password" name="confirm_password" id="id_confirm_password" class="form-control" style="padding-right: 44px;" required>
+                    <button type="button" onclick="toggleField('id_confirm_password', 'eye3')" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--txt-dark-400); cursor: pointer;">
+                        <i class="fa-solid fa-eye" id="eye3"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-dark" style="margin-top: 16px; border-color: var(--clr-danger); color: white; background-color: var(--bg-dark-800);">
+            <i class="fa-solid fa-key"></i> Update Password
+        </button>
+    </form>
+</div>
+
+<script>
+function toggleField(inputId, eyeId) {
+    const input = document.getElementById(inputId);
+    const eye = document.getElementById(eyeId);
+    if (input.type === 'password') {
+        input.type = 'text';
+        eye.classList.remove('fa-eye');
+        eye.classList.add('fa-eye-slash');
+    } else {
+        input.type = 'password';
+        eye.classList.remove('fa-eye-slash');
+        eye.classList.add('fa-eye');
+    }
+}
+</script>
+{% endblock %}

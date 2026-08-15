@@ -1,0 +1,195 @@
+{% extends 'dashboard/dashboard_base.html' %}
+
+{% block db_page_title %}{% if form.instance.pk %}Edit Scaife Entry{% else %}Register New Scaife Entry{% endif %}{% endblock %}
+
+{% block db_content %}
+<div class="db-card-form">
+    <div style="margin-bottom: 28px;">
+        <h3>{% if form.instance.pk %}Edit Scaife Entry{% else %}Register New Scaife Entry{% endif %}</h3>
+        <p style="color: var(--txt-dark-400);">Select services, enter quantities — bill is auto-calculated and WhatsApp notification sent to admin automatically on save.</p>
+    </div>
+
+    <form method="POST">
+        {% csrf_token %}
+        
+        {% if form.errors %}
+            <div style="background-color: rgba(239, 68, 68, 0.1); border-left: 4px solid var(--clr-danger); padding: 16px; border-radius: var(--border-radius-sm); margin-bottom: 24px; color: var(--clr-danger); font-size: 0.95rem;">
+                <p><strong>Please correct the following errors:</strong></p>
+                <ul style="margin-left: 20px; margin-top: 8px;">
+                    {% for field in form %}{% for error in field.errors %}<li>{{ field.label }}: {{ error }}</li>{% endfor %}{% endfor %}
+                    {% for error in form.non_field_errors %}<li>{{ error }}</li>{% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        <!-- Office Badge -->
+        <div class="form-group" style="margin-bottom: 22px;">
+            <label><i class="fa-solid fa-building" style="color: var(--clr-primary);"></i> Processing Office</label>
+            <div style="display: flex; align-items: center; gap: 12px; background: linear-gradient(135deg, #e0f2fe, #f0f9ff); border: 2px solid var(--clr-primary); border-radius: var(--border-radius-sm); padding: 14px 18px;">
+                <i class="fa-solid fa-location-dot" style="color: var(--clr-primary); font-size: 1.1rem;"></i>
+                <span style="font-weight: 700; font-size: 1.05rem; color: var(--clr-primary);">{{ office_name }}</span>
+                <span style="margin-left: auto; font-size: 0.78rem; color: var(--txt-dark-400); background: white; padding: 3px 10px; border-radius: 20px; border: 1px solid #bae6fd;">Auto-assigned</span>
+            </div>
+        </div>
+
+        <!-- Service Pills -->
+        <div class="form-group" style="margin-bottom: 24px;">
+            <label style="margin-bottom: 10px; display: block; font-weight: 700; color: var(--txt-dark-800);">
+                <i class="fa-solid fa-list-check" style="color: var(--clr-primary);"></i> Step 1 — Select Services:
+            </label>
+            <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+                <label class="service-pill" id="pill_lapping" style="cursor: pointer; padding: 14px 22px; border-radius: 12px; border: 2px solid #e2e8f0; background: #f8fafc; display: flex; align-items: center; gap: 10px; transition: all 0.2s ease;">
+                    <input type="checkbox" name="service_lapping" id="id_service_lapping" {% if form.service_lapping.value %}checked{% endif %} onchange="updateVisibilityAndCost();" style="width: 18px; height: 18px; accent-color: var(--clr-primary);">
+                    <span style="font-weight: 700; font-size: 0.95rem;"><i class="fa-solid fa-compact-disc" style="color: var(--clr-primary);"></i> Lapping</span>
+                    <span style="font-size: 0.78rem; color: var(--txt-dark-500);">(₹{{ pricing_config.lapping_rate|floatformat:0 }}/unit)</span>
+                </label>
+                <label class="service-pill" id="pill_coating" style="cursor: pointer; padding: 14px 22px; border-radius: 12px; border: 2px solid #e2e8f0; background: #f8fafc; display: flex; align-items: center; gap: 10px; transition: all 0.2s ease;">
+                    <input type="checkbox" name="service_coating" id="id_service_coating" {% if form.service_coating.value %}checked{% endif %} onchange="updateVisibilityAndCost();" style="width: 18px; height: 18px; accent-color: #8b5cf6;">
+                    <span style="font-weight: 700; font-size: 0.95rem;"><i class="fa-solid fa-flask" style="color: #8b5cf6;"></i> Coating</span>
+                    <span style="font-size: 0.78rem; color: var(--txt-dark-500);">(₹{{ pricing_config.coating_rate|floatformat:0 }}/unit)</span>
+                </label>
+                <label class="service-pill" id="pill_diamond" style="cursor: pointer; padding: 14px 22px; border-radius: 12px; border: 2px solid #e2e8f0; background: #f8fafc; display: flex; align-items: center; gap: 10px; transition: all 0.2s ease;">
+                    <input type="checkbox" name="service_diamond_scaife" id="id_service_diamond_scaife" {% if form.service_diamond_scaife.value %}checked{% endif %} onchange="updateVisibilityAndCost();" style="width: 18px; height: 18px; accent-color: #06b6d4;">
+                    <span style="font-weight: 700; font-size: 0.95rem;"><i class="fa-solid fa-gem" style="color: #06b6d4;"></i> Diamond Scaife</span>
+                    <span style="font-size: 0.78rem; color: var(--txt-dark-500);">(₹{{ pricing_config.diamond_scaife_rate|floatformat:0 }}/unit)</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Quantities Section -->
+        <div style="background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 14px; padding: 20px 24px; margin-bottom: 28px;">
+            <label style="margin-bottom: 14px; display: block; font-weight: 700; color: var(--txt-dark-800); font-size: 0.95rem;">
+                <i class="fa-solid fa-layer-group" style="color: var(--clr-primary);"></i> Step 2 — Enter Quantity for Each Service:
+            </label>
+            <input type="hidden" name="quantity" id="id_quantity" value="{{ form.quantity.value|default:0 }}">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                <div id="box_lapping" style="display:none; background: white; padding: 14px 18px; border-radius: 10px; border: 2px solid #0ea5e9;">
+                    <label for="id_quantity_lapping" style="color: #0369a1; font-weight: 700; font-size: 0.85rem; display:block; margin-bottom:6px;"><i class="fa-solid fa-compact-disc"></i> Lapping Count</label>
+                    <input type="number" name="quantity_lapping" id="id_quantity_lapping" value="{{ form.quantity_lapping.value|default:1 }}" min="0" class="form-control" style="font-size: 1.4rem; font-weight: 800; color: #0284c7; text-align:center;" oninput="updateVisibilityAndCost();">
+                    <div style="margin-top:6px; font-size:0.8rem; color:#0369a1; font-weight:600;">= ₹<span id="cost_lapping">0.00</span></div>
+                </div>
+                <div id="box_coating" style="display:none; background: white; padding: 14px 18px; border-radius: 10px; border: 2px solid #8b5cf6;">
+                    <label for="id_quantity_coating" style="color: #6d28d9; font-weight: 700; font-size: 0.85rem; display:block; margin-bottom:6px;"><i class="fa-solid fa-flask"></i> Coating Count</label>
+                    <input type="number" name="quantity_coating" id="id_quantity_coating" value="{{ form.quantity_coating.value|default:1 }}" min="0" class="form-control" style="font-size: 1.4rem; font-weight: 800; color: #7c3aed; text-align:center;" oninput="updateVisibilityAndCost();">
+                    <div style="margin-top:6px; font-size:0.8rem; color:#6d28d9; font-weight:600;">= ₹<span id="cost_coating">0.00</span></div>
+                </div>
+                <div id="box_diamond" style="display:none; background: white; padding: 14px 18px; border-radius: 10px; border: 2px solid #06b6d4;">
+                    <label for="id_quantity_diamond" style="color: #0e7490; font-weight: 700; font-size: 0.85rem; display:block; margin-bottom:6px;"><i class="fa-solid fa-gem"></i> Diamond Count</label>
+                    <input type="number" name="quantity_diamond" id="id_quantity_diamond" value="{{ form.quantity_diamond.value|default:1 }}" min="0" class="form-control" style="font-size: 1.4rem; font-weight: 800; color: #0891b2; text-align:center;" oninput="updateVisibilityAndCost();">
+                    <div style="margin-top:6px; font-size:0.8rem; color:#0e7490; font-weight:600;">= ₹<span id="cost_diamond">0.00</span></div>
+                </div>
+            </div>
+            <!-- Live Total -->
+            <div id="cost_summary" style="display:none; margin-top:18px; background: linear-gradient(135deg, #0f172a, #1e293b); border-radius: 10px; padding: 14px 20px; color:white; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                <span style="color:#94a3b8; font-size:0.9rem;">Total: <strong id="summary_qty" style="color:white; font-size:1.1rem;">0</strong> scaife(s)</span>
+                <span style="font-size:1.4rem; font-weight:800; color:#34d399;">₹<span id="summary_cost">0.00</span></span>
+            </div>
+        </div>
+
+        <!-- Repair -->
+        <div style="background: rgba(245,158,11,0.05); border: 2px dashed #f59e0b; border-radius: 14px; padding: 20px 24px; margin-bottom: 28px;">
+            <label style="cursor:pointer; display:flex; align-items:center; gap:10px; margin:0; font-weight:700;">
+                <input type="checkbox" name="needs_repair" id="id_needs_repair" {% if form.needs_repair.value %}checked{% endif %} onchange="updateRepairVisibility();" style="width:18px; height:18px; accent-color:#f59e0b;">
+                <span><i class="fa-solid fa-screwdriver-wrench" style="color:#f59e0b;"></i> This entry needs Repair</span>
+            </label>
+            <div id="repair_details_container" style="display:none; margin-top:15px;">
+                <label for="id_repair_details" style="font-weight:600; font-size:0.9rem; display:block; margin-bottom:6px;"><i class="fa-solid fa-align-left"></i> Repair Details</label>
+                <textarea name="repair_details" id="id_repair_details" class="form-control" rows="3" placeholder="e.g. 'I have to repair this side, lapping needed'">{{ form.repair_details.value|default:'' }}</textarea>
+            </div>
+        </div>
+
+        <!-- Bill + Notes -->
+        <div class="form-grid-2">
+            <div class="form-group">
+                <label for="id_cost"><i class="fa-solid fa-indian-rupee-sign"></i> Total Bill (INR)</label>
+                <input type="number" step="0.01" name="cost" id="id_cost" value="{{ form.cost.value|default:'0.00' }}" class="form-control" style="font-weight:800; font-size:1.5rem; color:#16a34a; background:#f0fdf4; border:2px solid #22c55e;" readonly>
+                <small style="color:var(--txt-dark-400);">Auto-calculated: Qty × Rate for each service</small>
+            </div>
+            <div class="form-group">
+                <label for="id_notes"><i class="fa-solid fa-comment-dots"></i> Notes / Remarks</label>
+                <textarea name="notes" id="id_notes" class="form-control" rows="3" placeholder="Any specific instructions...">{{ form.notes.value|default:'' }}</textarea>
+            </div>
+        </div>
+
+        <div style="display:flex; gap:16px; margin-top:32px; justify-content:flex-end;">
+            <a href="{% url 'scaife_list' %}" class="btn btn-outline" style="border-color:var(--bg-dark-700); color:var(--bg-dark-700);">Cancel</a>
+            <button type="submit" class="btn btn-primary" style="padding:12px 36px; font-size:1rem; display:flex; align-items:center; gap:8px;">
+                <i class="fa-brands fa-whatsapp" style="font-size:1.2rem;"></i> Save &amp; Notify Admin via WhatsApp
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+const rates = {
+    lapping: {{ pricing_config.lapping_rate|default:150 }},
+    coating: {{ pricing_config.coating_rate|default:200 }},
+    diamond: {{ pricing_config.diamond_scaife_rate|default:300 }}
+};
+
+function updateVisibilityAndCost() {
+    const isLap  = document.getElementById('id_service_lapping').checked;
+    const isCoat = document.getElementById('id_service_coating').checked;
+    const isDia  = document.getElementById('id_service_diamond_scaife').checked;
+
+    const applyPill = (pillId, active, bg, border) => {
+        const el = document.getElementById(pillId);
+        if (el) {
+            el.style.background   = active ? bg : '#f8fafc';
+            el.style.borderColor  = active ? border : '#e2e8f0';
+        }
+    };
+    applyPill('pill_lapping', isLap,  '#e0f2fe', '#0ea5e9');
+    applyPill('pill_coating', isCoat, '#f3e8ff', '#8b5cf6');
+    applyPill('pill_diamond', isDia,  '#ecfeff', '#06b6d4');
+
+    document.getElementById('box_lapping').style.display = isLap  ? 'block' : 'none';
+    document.getElementById('box_coating').style.display = isCoat ? 'block' : 'none';
+    document.getElementById('box_diamond').style.display = isDia  ? 'block' : 'none';
+
+    // Parse values but do NOT overwrite input box contents while typing (allowing backspaces)
+    let lapVal = parseInt(document.getElementById('id_quantity_lapping').value);
+    if (isNaN(lapVal) || lapVal < 0) lapVal = 0;
+
+    let coatVal = parseInt(document.getElementById('id_quantity_coating').value);
+    if (isNaN(coatVal) || coatVal < 0) coatVal = 0;
+
+    let diaVal = parseInt(document.getElementById('id_quantity_diamond').value);
+    if (isNaN(diaVal) || diaVal < 0) diaVal = 0;
+
+    const lapQty  = isLap  ? lapVal : 0;
+    const coatQty = isCoat ? coatVal : 0;
+    const diaQty  = isDia  ? diaVal : 0;
+
+    const totalQty  = lapQty + coatQty + diaQty;
+    const lapCost   = lapQty  * rates.lapping;
+    const coatCost  = coatQty * rates.coating;
+    const diaCost   = diaQty  * rates.diamond;
+    const totalCost = lapCost + coatCost + diaCost;
+
+    document.getElementById('id_quantity').value              = totalQty;
+    document.getElementById('id_cost').value                  = totalCost.toFixed(2);
+    document.getElementById('cost_lapping').innerText         = lapCost.toFixed(2);
+    document.getElementById('cost_coating').innerText         = coatCost.toFixed(2);
+    document.getElementById('cost_diamond').innerText         = diaCost.toFixed(2);
+    document.getElementById('summary_qty').innerText          = totalQty;
+    document.getElementById('summary_cost').innerText         = totalCost.toFixed(2);
+
+    const anySelected = isLap || isCoat || isDia;
+    document.getElementById('cost_summary').style.display = anySelected ? 'flex' : 'none';
+}
+
+function updateRepairVisibility() {
+    const v = document.getElementById('id_needs_repair').checked;
+    document.getElementById('repair_details_container').style.display = v ? 'block' : 'none';
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    updateVisibilityAndCost();
+    updateRepairVisibility();
+    {% if form.needs_repair.value %}
+    document.getElementById('repair_details_container').style.display = 'block';
+    {% endif %}
+});
+</script>
+{% endblock %}

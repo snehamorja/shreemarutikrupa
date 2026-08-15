@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}About Us | {{ branding.company_name }}{% endblock %}
+
+{% block content %}
+<!-- Subheader Banner -->
+<section class="section-padding" style="background: linear-gradient(135deg, var(--bg-dark-900) 0%, var(--bg-dark-800) 100%); color: white; padding: 60px 0; text-align: center;">
+    <div class="container">
+        <h1 style="color: white; font-size: 3rem; margin-bottom: 12px;">About Our Company</h1>
+        <p style="color: var(--txt-light-300); max-width: 600px; margin: 0 auto;">Dedicated to keeping the diamond cutting industry supplied with flat, balanced, and premium-coated scaifes since 2011.</p>
+    </div>
+</section>
+
+<!-- Company History & Who We Are -->
+<section class="section-padding">
+    <div class="container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center;">
+        <div>
+            <h2 style="font-size: 2.25rem; margin-bottom: 20px;">Our Journey & History</h2>
+            <p style="margin-bottom: 16px;">Founded in the heart of Surat's diamond polishing cluster, our business began as a small workshops servicing local polishing benches. We realized early on that diamond cutters faced massive challenges with scaife wear, plate balancing, and coating adhesion, leading to uneven facets and damaged stones.</p>
+            <p style="margin-bottom: 16px;">By investing in advanced CNC lapping machines and chemical vapor deposition research, we introduced precision-controlled lapping and high-tech DLC (Diamond-Like Carbon) coatings to the local market. Today, we operate two state-of-the-art service centers in Surat and Mumbai, processing thousands of scaifes annually for leading diamond manufacturers.</p>
+            <p>Our commitment to precision engineering remains unchanged. Every plate we process is measured to sub-micron tolerances, ensuring your polishing line operates efficiently without interruptions.</p>
+        </div>
+        <div>
+            <div style="background-color: var(--bg-light-200); padding: 40px; border-radius: var(--border-radius-md); border: 1px solid var(--bg-light-300); box-shadow: var(--shadow-sm);">
+                <h3 style="font-size: 1.5rem; margin-bottom: 24px; color: var(--clr-primary);"><i class="fa-solid fa-medal"></i> Why Customers Trust Us</h3>
+                <ul style="list-style: none; display: flex; flex-direction: column; gap: 16px;">
+                    <li style="display: flex; gap: 16px; align-items: flex-start;">
+                        <i class="fa-solid fa-circle-check" style="color: var(--clr-success); margin-top: 4px;"></i>
+                        <div>
+                            <strong>Certified Flatness:</strong> We verify all plate profiles using high-accuracy dial indicators and optical tests.
+                        </div>
+                    </li>
+                    <li style="display: flex; gap: 16px; align-items: flex-start;">
+                        <i class="fa-solid fa-circle-check" style="color: var(--clr-success); margin-top: 4px;"></i>
+                        <div>
+                            <strong>Specialized Chemistry:</strong> Our coatings are formulated for extreme adhesion, keeping abrasive diamond powder secure.
+                        </div>
+                    </li>
+                    <li style="display: flex; gap: 16px; align-items: flex-start;">
+                        <i class="fa-solid fa-circle-check" style="color: var(--clr-success); margin-top: 4px;"></i>
+                        <div>
+                            <strong>Transparent Tracking:</strong> Customers can track progress, view inspection logs, and download service bills directly.
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Vision, Mission & Values -->
+<section class="section-padding" style="background-color: var(--bg-light-200);">
+    <div class="container">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 32px;">
+            <!-- Vision -->
+            <div style="background: white; padding: 40px; border-radius: var(--border-radius-md); box-shadow: var(--shadow-sm); border: 1px solid var(--bg-light-300);">
+                <i class="fa-solid fa-eye" style="font-size: 2.5rem; color: var(--clr-primary); margin-bottom: 20px;"></i>
+                <h3 style="margin-bottom: 16px;">Our Vision</h3>
+                <p>To be the global benchmark for diamond processing plate technology, continually engineering durable and balanced surfaces that empower cutters to create perfect diamonds.</p>
+            </div>
+            
+            <!-- Mission -->
+            <div style="background: white; padding: 40px; border-radius: var(--border-radius-md); box-shadow: var(--shadow-sm); border: 1px solid var(--bg-light-300);">
+                <i class="fa-solid fa-bullseye" style="font-size: 2.5rem; color: var(--clr-secondary); margin-bottom: 20px;"></i>
+                <h3 style="margin-bottom: 16px;">Our Mission</h3>
+                <p>To provide high-precision scaife lapping and coating services using automated technology, ensuring minimal downtime, cost-efficient operations, and absolute service transparency for diamond manufacturers.</p>
+            </div>
+
+            <!-- Core Values -->
+            <div style="background: white; padding: 40px; border-radius: var(--border-radius-md); box-shadow: var(--shadow-sm); border: 1px solid var(--bg-light-300);">
+                <i class="fa-solid fa-heart" style="font-size: 2.5rem; color: var(--clr-danger); margin-bottom: 20px;"></i>
+                <h3 style="margin-bottom: 16px;">Core Values</h3>
+                <p>Integrity in measurement, precision in execution, customer-centric support, and constant technological innovation in abrasive metallurgy.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Team Information -->
+<section class="section-padding">
+    <div class="container">
+        <div class="section-header text-center">
+            <h2>Our Leadership Team</h2>
+            <p>Our operation is guided by experienced mechanical engineers and coating experts.</p>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 32px;">
+            <!-- Member 1 -->
+            <div class="text-center" style="background: white; padding: 32px; border-radius: var(--border-radius-md); box-shadow: var(--shadow-sm); border: 1px solid var(--bg-light-300);">
+                <div style="width: 120px; height: 120px; border-radius: 50%; background-color: var(--bg-light-300); margin: 0 auto 20px; display: flex; align-items: center; justify-content: center;">
+                    <i class="fa-solid fa-user-tie" style="font-size: 3rem; color: var(--bg-dark-700);"></i>
+                </div>
+                <h3>Dinesh Patel</h3>
+                <p style="color: var(--clr-primary); font-weight: 600; margin-bottom: 12px;">Founder & Director</p>
+                <p style="font-size: 0.9rem; color: var(--txt-dark-400);">Over 25 years of engineering experience in diamond abrasive machinery and tool development.</p>
+            </div>
+
+            <!-- Member 2 -->
+            <div class="text-center" style="background: white; padding: 32px; border-radius: var(--border-radius-md); box-shadow: var(--shadow-sm); border: 1px solid var(--bg-light-300);">
+                <div style="width: 120px; height: 120px; border-radius: 50%; background-color: var(--bg-light-300); margin: 0 auto 20px; display: flex; align-items: center; justify-content: center;">
+                    <i class="fa-solid fa-user-gear" style="font-size: 3rem; color: var(--bg-dark-700);"></i>
+                </div>
+                <h3>Sanjay Patel</h3>
+                <p style="color: var(--clr-primary); font-weight: 600; margin-bottom: 12px;">Head of Lapping Operations</p>
+                <p style="font-size: 0.9rem; color: var(--txt-dark-400);">Mechanical engineer specializing in CNC surface grinding and dynamic balancing algorithms.</p>
+            </div>
+
+            <!-- Member 3 -->
+            <div class="text-center" style="background: white; padding: 32px; border-radius: var(--border-radius-md); box-shadow: var(--shadow-sm); border: 1px solid var(--bg-light-300);">
+                <div style="width: 120px; height: 120px; border-radius: 50%; background-color: var(--bg-light-300); margin: 0 auto 20px; display: flex; align-items: center; justify-content: center;">
+                    <i class="fa-solid fa-user-shield" style="font-size: 3rem; color: var(--bg-dark-700);"></i>
+                </div>
+                <h3>Dr. Ravi Mehta</h3>
+                <p style="color: var(--clr-primary); font-weight: 600; margin-bottom: 12px;">Chief Coating Specialist</p>
+                <p style="font-size: 0.9rem; color: var(--txt-dark-400);">Ph.D. in Materials Science. Lead designer of our proprietary DLC coating vapor deposition process.</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

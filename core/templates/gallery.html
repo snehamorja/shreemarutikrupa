@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Gallery | {{ branding.company_name }}{% endblock %}
+
+{% block content %}
+<!-- Subheader Banner -->
+<section class="section-padding" style="background: linear-gradient(135deg, var(--bg-dark-900) 0%, var(--bg-dark-800) 100%); color: white; padding: 60px 0; text-align: center;">
+    <div class="container">
+        <h1 style="color: white; font-size: 3rem; margin-bottom: 12px;">Our Facility Gallery</h1>
+        <p style="color: var(--txt-light-300); max-width: 600px; margin: 0 auto;">Take a look inside our high-tech workshop environments, automated lapping machines, and finished scaife collections.</p>
+    </div>
+</section>
+
+<!-- Gallery Section -->
+<section class="section-padding">
+    <div class="container">
+        <!-- Gallery Category Filters -->
+        <div class="gallery-filter">
+            <button class="filter-btn active" data-filter="all">All Photos</button>
+            <button class="filter-btn" data-filter="office">Offices & Facilities</button>
+            <button class="filter-btn" data-filter="machine">Machinery</button>
+            <button class="filter-btn" data-filter="process">Work Process</button>
+            <button class="filter-btn" data-filter="product">Finished Products</button>
+        </div>
+        
+        <!-- Gallery Grid -->
+        <div class="gallery-grid">
+            <!-- Item 1: Lapping Machine -->
+            <div class="gallery-card" data-category="machine">
+                <div class="gallery-img-wrapper">
+                    <div style="background: linear-gradient(135deg, #1e293b, #0f172a); color: var(--clr-primary); height: 100%; display: flex; align-items: center; justify-content: center;">
+                        <i class="fa-solid fa-industry" style="font-size: 4rem;"></i>
+                    </div>
+                </div>
+                <div class="gallery-info">
+                    <h4>CNC Flatness Grinder</h4>
+                    <span>Machinery</span>
+                </div>
+            </div>
+
+            <!-- Item 2: Lapping Process -->
+            <div class="gallery-card" data-category="process">
+                <div class="gallery-img-wrapper">
+                    <div style="background: linear-gradient(135deg, #1e293b, #0f172a); color: var(--clr-success); height: 100%; display: flex; align-items: center; justify-content: center;">
+                        <i class="fa-solid fa-oil-well" style="font-size: 4rem;"></i>
+                    </div>
+                </div>
+                <div class="gallery-info">
+                    <h4>Abrasive Slurry Application</h4>
+                    <span>Work Process</span>
+                </div>
+            </div>
+
+            <!-- Item 3: Finished Scaife -->
+            <div class="gallery-card" data-category="product">
+                <div class="gallery-img-wrapper">
+                    <div style="background: linear-gradient(135deg, #1e293b, #0f172a); color: var(--clr-secondary); height: 100%; display: flex; align-items: center; justify-content: center;">
+                        <i class="fa-solid fa-compact-disc" style="font-size: 4rem;"></i>
+                    </div>
+                </div>
+                <div class="gallery-info">
+                    <h4>Balanced Premium DLC Scaife</h4>
+                    <span>Finished Products</span>
+                </div>
+            </div>
+
+            <!-- Item 4: Surat HQ Office -->
+            <div class="gallery-card" data-category="office">
+                <div class="gallery-img-wrapper">
+                    <div style="background: linear-gradient(135deg, #1e293b, #0f172a); color: var(--clr-info); height: 100%; display: flex; align-items: center; justify-content: center;">
+                        <i class="fa-solid fa-building" style="font-size: 4rem;"></i>
+                    </div>
+                </div>
+                <div class="gallery-info">
+                    <h4>Surat HQ Reception</h4>
+                    <span>Offices & Facilities</span>
+                </div>
+            </div>
+
+            <!-- Item 5: Coating Chamber -->
+            <div class="gallery-card" data-category="machine">
+                <div class="gallery-img-wrapper">
+                    <div style="background: linear-gradient(135deg, #1e293b, #0f172a); color: #a855f7; height: 100%; display: flex; align-items: center; justify-content: center;">
+                        <i class="fa-solid fa-cubes" style="font-size: 4rem;"></i>
+                    </div>
+                </div>
+                <div class="gallery-info">
+                    <h4>Chemical Vapor Deposition Chamber</h4>
+                    <span>Machinery</span>
+                </div>
+            </div>
+
+            <!-- Item 6: Quality Inspection -->
+            <div class="gallery-card" data-category="process">
+                <div class="gallery-img-wrapper">
+                    <div style="background: linear-gradient(135deg, #1e293b, #0f172a); color: var(--clr-danger); height: 100%; display: flex; align-items: center; justify-content: center;">
+                        <i class="fa-solid fa-magnifying-glass-chart" style="font-size: 4rem;"></i>
+                    </div>
+                </div>
+                <div class="gallery-info">
+                    <h4>Sub-Micron Runout Audit</h4>
+                    <span>Work Process</span>
+                </div>
+            </div>
+            
+            <!-- Dynamic items loaded from database if any -->
+            {% for item in items %}
+                <div class="gallery-card" data-category="{{ item.category }}">
+                    <div class="gallery-img-wrapper">
+                        <img src="{{ item.image.url }}" alt="{{ item.title }}">
+                    </div>
+                    <div class="gallery-info">
+                        <h4>{{ item.title }}</h4>
+                        <span>{{ item.get_category_display }}</span>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        const galleryCards = document.querySelectorAll('.gallery-card');
+
+        filterButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                // Remove active class from other buttons
+                filterButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+
+                const filter = button.getAttribute('data-filter');
+
+                galleryCards.forEach(card => {
+                    const category = card.getAttribute('data-category');
+                    if (filter === 'all' || category === filter) {
+                        card.style.display = 'block';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            });
+        });
+    });
+</script>
+{% endblock %}

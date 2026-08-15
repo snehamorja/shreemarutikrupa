@@ -1,0 +1,267 @@
+{% extends 'dashboard/dashboard_base.html' %}
+
+{% block db_page_title %}Portal & Branding Settings{% endblock %}
+
+{% block db_content %}
+<div class="db-card-form" style="max-width: 900px;">
+    <div style="margin-bottom: 32px;">
+        <h3>Dynamic Portal Control</h3>
+        <p style="color: var(--txt-dark-400);">Modify logo assets, contact information, email configurations, and perform database operations without touching the codebase.</p>
+    </div>
+
+    <!-- Branding Settings Form -->
+    <form id="brandingSettingsForm" method="POST" enctype="multipart/form-data" class="settings-section-card">
+        {% csrf_token %}
+        <input type="hidden" name="form_type" value="branding">
+
+        <h4 style="color: var(--clr-primary); border-bottom: 1px solid var(--bg-light-300); padding-bottom: 8px; margin-bottom: 24px;">
+            <i class="fa-solid fa-paintbrush"></i> Visual Identity & Branding
+        </h4>
+
+        <div class="form-grid-2">
+            <div class="form-group">
+                <label for="id_company_name">Company Name</label>
+                <input type="text" name="company_name" id="id_company_name" value="{{ branding.company_name }}" class="form-control" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="id_tagline">Hero Tagline / Description</label>
+                <input type="text" name="tagline" id="id_tagline" value="{{ branding.tagline }}" class="form-control" required>
+            </div>
+        </div>
+
+        <div class="form-grid-2">
+            <div class="form-group">
+                <label for="id_logo">Upload Company Logo</label>
+                <input type="file" name="logo" id="id_logo" class="form-control">
+                <div class="branding-logo-preview">
+                    {% if branding.logo %}
+                        <img src="{{ branding.logo.url }}" alt="Logo">
+                    {% else %}
+                        <span style="font-size: 0.8rem; color: var(--txt-dark-400);">No Logo Uploaded</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="id_favicon">Upload Favicon (.ico / .png)</label>
+                <input type="file" name="favicon" id="id_favicon" class="form-control">
+                <div class="branding-logo-preview" style="width: 48px; height: 48px;">
+                    {% if branding.favicon %}
+                        <img src="{{ branding.favicon.url }}" alt="Favicon">
+                    {% else %}
+                        <span style="font-size: 0.8rem; color: var(--txt-dark-400);">Favicon</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div style="text-align: right; margin-bottom: 24px;">
+            <button type="submit" class="btn btn-primary" style="padding: 10px 24px;">
+                <i class="fa-solid fa-save"></i> Save Branding Settings
+            </button>
+        </div>
+
+        <h4 style="color: var(--clr-primary); border-bottom: 1px solid var(--bg-light-300); padding-bottom: 8px; margin-top: 40px; margin-bottom: 24px;">
+            <i class="fa-solid fa-address-book"></i> Factory Contact Details
+        </h4>
+
+        <div class="form-grid-2">
+            <div class="form-group">
+                <label for="id_contact_email">Enquiry Email</label>
+                <input type="email" name="contact_email" id="id_contact_email" value="{{ branding.contact_email }}" class="form-control" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="id_contact_phone">Contact Phone</label>
+                <input type="text" name="contact_phone" id="id_contact_phone" value="{{ branding.contact_phone }}" class="form-control" required>
+            </div>
+        </div>
+
+        <div class="form-grid-2">
+            <div class="form-group">
+                <label for="id_office_hours">Office Hours</label>
+                <input type="text" name="office_hours" id="id_office_hours" value="{{ branding.office_hours }}" class="form-control" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="id_whatsapp_number">WhatsApp Contact Number</label>
+                <input type="text" name="whatsapp_number" id="id_whatsapp_number" value="{{ branding.whatsapp_number }}" class="form-control" placeholder="+91 99887 76655" required>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="id_address">Postal Address</label>
+            <textarea name="address" id="id_address" class="form-control" required>{{ branding.address }}</textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="id_google_map_embed">Google Map Embed Link (src attribute inside Iframe)</label>
+            <input type="text" name="google_map_embed" id="id_google_map_embed" value="{{ branding.google_map_embed }}" class="form-control">
+        </div>
+
+        <div class="form-group">
+            <label for="id_footer_text">Footer Copy Text</label>
+            <input type="text" name="footer_text" id="id_footer_text" value="{{ branding.footer_text }}" class="form-control" required>
+        </div>
+
+        <div class="form-grid-2">
+            <div class="form-group">
+                <label for="id_facebook_url">Facebook Link</label>
+                <input type="url" name="facebook_url" id="id_facebook_url" value="{{ branding.facebook_url }}" class="form-control">
+            </div>
+            
+            <div class="form-group">
+                <label for="id_linkedin_url">LinkedIn Link</label>
+                <input type="url" name="linkedin_url" id="id_linkedin_url" value="{{ branding.linkedin_url }}" class="form-control">
+            </div>
+        </div>
+
+        <div style="text-align: right; margin-bottom: 24px;">
+            <button type="submit" class="btn btn-primary" style="padding: 10px 24px;">
+                <i class="fa-solid fa-save"></i> Save Contact Details
+            </button>
+        </div>
+
+        <h4 style="color: var(--clr-primary); border-bottom: 1px solid var(--bg-light-300); padding-bottom: 8px; margin-top: 40px; margin-bottom: 16px;">
+            <i class="fa-solid fa-user-shield"></i> Master Security PIN Control (Password Protection)
+        </h4>
+
+        <div style="background: rgba(245,158,11,0.08); border-left: 4px solid var(--clr-warning); padding: 14px 18px; border-radius: var(--border-radius-sm); margin-bottom: 20px; font-size: 0.85rem; color: var(--txt-dark-700); line-height: 1.6;">
+            <strong><i class="fa-solid fa-lock" style="color: var(--clr-warning);"></i> Master Security PIN Protection:</strong>
+            <p style="margin: 4px 0 0;">This PIN is required whenever an Admin clicks to reveal or copy office passwords on the dashboard. Default PIN is <code>1234</code>.</p>
+        </div>
+
+        <div class="form-grid-2" style="max-width: 650px;">
+            <div class="form-group">
+                <label for="id_admin_security_pin"><i class="fa-solid fa-key"></i> New Master Security PIN (4-Digit)</label>
+                <div style="position: relative;">
+                    <input type="password" name="admin_security_pin" id="id_admin_security_pin" value="{{ branding.admin_security_pin|default:'1234' }}" maxlength="6" class="form-control" placeholder="E.g. 1234" style="font-weight: 700; letter-spacing: 4px; padding-right: 44px;" required oninput="checkPinMatch();">
+                    <button type="button" onclick="togglePass('id_admin_security_pin', 'pinEyeSet1')" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--txt-dark-400); cursor: pointer;">
+                        <i class="fa-solid fa-eye" id="pinEyeSet1"></i>
+                    </button>
+                </div>
+                <small style="color: var(--txt-dark-400); font-size: 0.78rem;">PIN required to unlock passwords across office cards</small>
+            </div>
+
+            <div class="form-group">
+                <label for="id_admin_security_pin_confirm"><i class="fa-solid fa-check-double"></i> Confirm Master Security PIN</label>
+                <div style="position: relative;">
+                    <input type="password" name="admin_security_pin_confirm" id="id_admin_security_pin_confirm" value="{{ branding.admin_security_pin|default:'1234' }}" maxlength="6" class="form-control" placeholder="Re-enter PIN" style="font-weight: 700; letter-spacing: 4px; padding-right: 44px;" required oninput="checkPinMatch();">
+                    <button type="button" onclick="togglePass('id_admin_security_pin_confirm', 'pinEyeSet2')" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--txt-dark-400); cursor: pointer;">
+                        <i class="fa-solid fa-eye" id="pinEyeSet2"></i>
+                    </button>
+                </div>
+                <small id="pinMatchStatus" style="font-size: 0.78rem; font-weight: 600; color: var(--clr-success); display: block; margin-top: 4px;">✓ PINs match</small>
+            </div>
+        </div>
+
+
+        <button type="submit" id="settingsSaveBtn" class="btn btn-primary" style="margin-top: 32px; padding: 12px 36px;">
+            <i class="fa-solid fa-save"></i> Save Branding & Security Settings
+        </button>
+    </form>
+
+    <!-- Database Backup and Restore Manager -->
+    <div class="settings-section-card" style="margin-top: 40px; border-bottom: none;">
+        <h4 style="color: var(--clr-danger); border-bottom: 1px solid var(--bg-light-300); padding-bottom: 8px; margin-bottom: 24px;">
+            <i class="fa-solid fa-database"></i> Database Backup & Restoration (SQLite Utility)
+        </h4>
+        
+        <p style="color: var(--txt-dark-700); margin-bottom: 24px;">Generate direct storage file backups, download snapshot archives, or upload a backup file to restore database status in case of issues.</p>
+        
+        <!-- Actions Grid -->
+        <div style="display: flex; gap: 16px; margin-bottom: 32px; flex-wrap: wrap;">
+            <a href="{% url 'backup_create' %}" class="btn btn-dark" style="border-color: var(--clr-primary); color: white; background-color: var(--bg-dark-800);">
+                <i class="fa-solid fa-file-invoice"></i> Create Database Backup
+            </a>
+            
+            <form method="POST" action="{% url 'backup_restore' %}" enctype="multipart/form-data" style="display: flex; gap: 12px; align-items: center;" onsubmit="return confirm('WARNING: Restoring will overwrite the current active database! Are you sure you want to proceed?');">
+                {% csrf_token %}
+                <input type="file" name="backup_file" accept=".sqlite3" class="form-control" style="width: auto; max-width: 250px;" required>
+                <button type="submit" class="btn btn-outline" style="border-color: var(--clr-danger); color: var(--clr-danger);">
+                    <i class="fa-solid fa-cloud-arrow-up"></i> Upload & Restore Backup
+                </button>
+            </form>
+        </div>
+
+        <!-- Backups list -->
+        <h5>Backups List</h5>
+        <div class="backup-list">
+            {% for backup in backup_files %}
+                <div class="backup-item">
+                    <div>
+                        <strong style="font-size: 0.95rem;">{{ backup.filename }}</strong>
+                        <span style="font-size: 0.8rem; color: var(--txt-dark-400); display: block;">Size: {{ backup.size|filesizeformat }} | Created: {{ backup.created }}</span>
+                    </div>
+                    <div style="display: flex; gap: 12px;">
+                        <a href="{% url 'backup_download' backup.filename %}" class="btn btn-outline" style="padding: 6px 12px; font-size: 0.8rem; border-color: var(--clr-success); color: var(--clr-success);">
+                            <i class="fa-solid fa-download"></i> Download
+                        </a>
+                    </div>
+                </div>
+            {% empty %}
+                <div style="padding: 24px; text-align: center; color: var(--txt-dark-400); font-size: 0.9rem;">
+                    No backup files found. Click "Create Database Backup" to create a snapshot.
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+// --- 2-step PIN match validation for settings page ---
+function checkPinMatch() {
+    const pin1 = document.getElementById('id_admin_security_pin');
+    const pin2 = document.getElementById('id_admin_security_pin_confirm');
+    const status = document.getElementById('pinMatchStatus');
+    const saveBtn = document.getElementById('settingsSaveBtn');
+    if (!pin1 || !pin2 || !status) return;
+
+    if (pin1.value.length === 0 || pin2.value.length === 0) {
+        status.innerText = '';
+        status.style.color = '';
+        return;
+    }
+
+    if (pin1.value === pin2.value) {
+        status.innerText = '✓ PINs match — ready to save';
+        status.style.color = 'var(--clr-success)';
+        pin1.style.borderColor = '#22c55e';
+        pin2.style.borderColor = '#22c55e';
+        if (saveBtn) saveBtn.disabled = false;
+    } else {
+        status.innerText = '✗ PINs do not match — please re-enter';
+        status.style.color = 'var(--clr-danger)';
+        pin1.style.borderColor = '#ef4444';
+        pin2.style.borderColor = '#ef4444';
+        if (saveBtn) saveBtn.disabled = true;
+    }
+}
+
+// Block form submit if PINs don't match
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('brandingSettingsForm');
+    if (form) {
+        form.addEventListener('submit', function (e) {
+            const pin1 = document.getElementById('id_admin_security_pin');
+            const pin2 = document.getElementById('id_admin_security_pin_confirm');
+            if (pin1 && pin2 && pin1.value !== pin2.value) {
+                e.preventDefault();
+                const status = document.getElementById('pinMatchStatus');
+                if (status) {
+                    status.innerText = '✗ PINs do not match! Fix before saving.';
+                    status.style.color = 'var(--clr-danger)';
+                }
+                pin1.focus();
+                return false;
+            }
+        });
+    }
+    // Run initial check
+    checkPinMatch();
+});
+</script>
+{% endblock %}
+{% endblock %}

@@ -1,0 +1,260 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#0c4a6e">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="/manifest.json">
+    <title>{% block title %}Dashboard | {{ branding.company_name }}{% endblock %}</title>
+    <!-- CSS and Fonts -->
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="dashboard-wrapper">
+
+    <!-- Toast Notifications Container -->
+    <div class="toast-container">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="toast {{ message.tags }}">
+                    <div class="toast-content">
+                        <span class="toast-title">
+                            {% if message.tags == 'success' %}Success
+                            {% elif message.tags == 'error' %}Error
+                            {% elif message.tags == 'warning' %}Warning
+                            {% else %}Info{% endif %}
+                        </span>
+                        <span class="toast-msg">{{ message }}</span>
+                    </div>
+                    <span class="toast-close">&times;</span>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <!-- Sidebar Navigation -->
+    <aside class="db-sidebar">
+        <div class="sidebar-header">
+            <a href="{% url 'home' %}" style="display: flex; align-items: center; gap: 10px;">
+                {% if branding and branding.logo %}
+                    <img src="{{ branding.logo.url }}" alt="{{ branding.company_name }}" style="height: 36px; object-fit: contain;">
+                {% else %}
+                    <i class="fa-solid fa-gem" style="color: var(--clr-primary); font-size: 1.5rem;"></i>
+                {% endif %}
+                <span class="sidebar-logo-text">Scaife Portal</span>
+            </a>
+        </div>
+        
+        <div class="sidebar-user">
+            <span class="user-name">{{ user.first_name }} {{ user.last_name }}</span>
+            <span class="user-role">{{ user.profile.get_role_display }}</span>
+            {% if user.profile.office %}
+                <span style="display: block; font-size: 0.75rem; color: var(--txt-light-300); margin-top: 4px;">
+                    <i class="fa-solid fa-building"></i> {{ user.profile.office.name }}
+                </span>
+            {% endif %}
+        </div>
+
+        <ul class="sidebar-menu">
+            <li class="sidebar-item {% if request.resolver_match.url_name == 'overview' %}active{% endif %}">
+                <a href="{% url 'overview' %}"><i class="fa-solid fa-gauge"></i> Overview</a>
+            </li>
+            
+            <li class="sidebar-item {% if request.resolver_match.url_name == 'scaife_list' %}active{% endif %}">
+                <a href="{% url 'scaife_list' %}"><i class="fa-solid fa-compact-disc"></i> Active Scaifes (24h)</a>
+            </li>
+
+            <li class="sidebar-item {% if request.resolver_match.url_name == 'scaife_history' %}active{% endif %}">
+                <a href="{% url 'scaife_history' %}"><i class="fa-solid fa-clock-rotate-left"></i> History & Archives</a>
+            </li>
+            
+
+            {% if user.profile.role == 'admin' %}
+
+                <li class="sidebar-item {% if 'offices' in request.path %}active{% endif %}">
+                    <a href="{% url 'office_list' %}"><i class="fa-solid fa-building-user"></i> Offices</a>
+                </li>
+                <li class="sidebar-item {% if 'workers' in request.path %}active{% endif %}">
+                    <a href="{% url 'worker_list' %}"><i class="fa-solid fa-user-group"></i> Workers Payroll</a>
+                </li>
+
+                <li class="sidebar-item {% if 'pricing' in request.path %}active{% endif %}">
+                    <a href="{% url 'pricing_edit' %}"><i class="fa-solid fa-indian-rupee-sign"></i> Pricing Config</a>
+                </li>
+                
+                <li class="sidebar-item {% if 'users' in request.path %}active{% endif %}">
+                    <a href="{% url 'user_list' %}"><i class="fa-solid fa-users-gear"></i> User Management</a>
+                </li>
+                
+                <li class="sidebar-item {% if 'logs' in request.path %}active{% endif %}">
+                    <a href="{% url 'activity_logs' %}"><i class="fa-solid fa-shield-halved"></i> Audit Trails</a>
+                </li>
+                
+                <li class="sidebar-item {% if 'settings' in request.path and 'profile' not in request.path %}active{% endif %}">
+                    <a href="{% url 'settings_edit' %}"><i class="fa-solid fa-sliders"></i> Portal Settings</a>
+                </li>
+            {% endif %}
+            
+            <li class="sidebar-item {% if 'profile' in request.path %}active{% endif %}">
+                <a href="{% url 'profile_edit' %}"><i class="fa-solid fa-user-pen"></i> My Profile</a>
+            </li>
+        </ul>
+
+        <div class="sidebar-footer">
+            <a href="{% url 'logout' %}" class="btn btn-dark" style="width: 100%; font-size: 0.9rem; padding: 10px;">
+                <i class="fa-solid fa-right-from-bracket"></i> Logout
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Section -->
+    <div class="db-main">
+        <header class="db-header">
+            <div style="display: flex; align-items: center; gap: 16px;">
+                <button id="sidebar-toggle" class="btn btn-outline" style="padding: 8px 12px; display: none;">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <div class="db-title">
+                    <h1>{% block db_page_title %}Overview{% endblock %}</h1>
+                </div>
+            </div>
+            
+            <div class="db-header-actions">
+                <span style="font-size: 0.9rem; color: var(--txt-dark-400);">
+                    <i class="fa-solid fa-calendar-days"></i> <span id="current-date"></span>
+                </span>
+            </div>
+        </header>
+
+        <main class="db-content">
+            {% block db_content %}{% endblock %}
+        </main>
+    </div>
+
+    <!-- ── Admin Master 4-Digit Security PIN Modal ── -->
+    <div id="pinSecurityModal" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(6px); z-index: 9999; align-items: center; justify-content: center; padding: 20px;">
+        <div style="background: white; border-radius: 20px; width: 100%; max-width: 400px; padding: 32px 28px; box-shadow: var(--shadow-lg); text-align: center; position: relative;">
+            <button onclick="closePinModal()" style="position: absolute; right: 16px; top: 16px; background: none; border: none; font-size: 1.3rem; color: var(--txt-dark-400); cursor: pointer;">&times;</button>
+
+            <div style="background: linear-gradient(135deg, #0c4a6e, #0369a1); color: white; width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; margin: 0 auto 16px; box-shadow: 0 4px 12px rgba(12,74,110,0.3);">
+                <i class="fa-solid fa-shield-halved"></i>
+            </div>
+
+            <h3 style="margin: 0 0 6px; color: var(--txt-dark-900); font-size: 1.25rem;">Enter 4-Digit Security PIN</h3>
+            <p style="color: var(--txt-dark-500); font-size: 0.85rem; margin: 0 0 20px;">Enter your <strong>4-Digit Security PIN</strong> to unlock and view the password. (Default PIN: <code style="background:#e0f2fe; color:#0369a1; padding:2px 6px; border-radius:4px; font-weight:700;">1234</code>)</p>
+
+            <div id="pinErrorMessage" style="display: none; background: rgba(239, 68, 68, 0.1); color: var(--clr-danger); padding: 10px 14px; border-radius: 8px; font-size: 0.85rem; margin-bottom: 16px; font-weight: 600;"></div>
+
+            <form id="pinVerificationForm" onsubmit="handlePinSubmission(event)">
+                {% csrf_token %}
+                <div style="position: relative; margin-bottom: 24px;">
+                    <input type="password" id="admin_input_pin" maxlength="6" class="form-control" placeholder="••••" style="text-align: center; font-size: 2rem; font-weight: 800; letter-spacing: 12px; font-family: monospace; height: 60px; border: 2px solid var(--clr-primary);" autofocus required oninput="if(this.value.length >= 4){ handlePinSubmission(); }">
+                    <button type="button" onclick="togglePass('admin_input_pin', 'pinEyeIcon')" style="position: absolute; right: 14px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--txt-dark-400); cursor: pointer; font-size: 1.1rem;">
+                        <i class="fa-solid fa-eye" id="pinEyeIcon"></i>
+                    </button>
+                </div>
+
+                <div style="display: flex; gap: 12px;">
+                    <button type="button" onclick="closePinModal()" class="btn btn-outline" style="flex: 1;">Cancel</button>
+                    <button type="submit" class="btn btn-primary" style="flex: 1; padding: 12px;"><i class="fa-solid fa-unlock"></i> Unlock</button>
+                </div>
+            </form>
+            <p style="font-size: 0.75rem; color: var(--txt-dark-400); margin-top: 18px;">
+                <i class="fa-solid fa-circle-info"></i> Change 4-Digit Security PIN in <strong>Portal Settings</strong>.
+            </p>
+        </div>
+    </div>
+
+    <!-- Script assets -->
+    <script src="{% static 'js/main.js' %}"></script>
+    <script>
+        // Dynamic date in header
+        document.getElementById('current-date').innerText = new Date().toLocaleDateString('en-US', {
+            weekday: 'short', year: 'numeric', month: 'short', day: 'numeric'
+        });
+
+        // Toggle sidebar for mobile
+        if (window.innerWidth <= 768) {
+            document.getElementById('sidebar-toggle').style.display = 'block';
+        }
+
+        // Register PWA Service Worker for App Store / Play Store / Mobile installation
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').then(reg => {
+                    console.log('PWA Service Worker registered:', reg.scope);
+                }).catch(err => {
+                    console.log('ServiceWorker registration failed:', err);
+                });
+            });
+        }
+
+        // Master Security PIN modal logic
+        let pinSuccessCallback = null;
+        let isPinUnlocked = sessionStorage.getItem('admin_pin_unlocked') === 'true';
+
+        function requestSecurityPinAccess(callback) {
+            if (isPinUnlocked) {
+                callback();
+                return;
+            }
+            pinSuccessCallback = callback;
+            document.getElementById('pinErrorMessage').style.display = 'none';
+            document.getElementById('admin_input_pin').value = '';
+            document.getElementById('pinSecurityModal').style.display = 'flex';
+            setTimeout(() => document.getElementById('admin_input_pin').focus(), 100);
+        }
+
+        function closePinModal() {
+            document.getElementById('pinSecurityModal').style.display = 'none';
+            pinSuccessCallback = null;
+        }
+
+        function handlePinSubmission(e) {
+            if (e && e.preventDefault) {
+                e.preventDefault();
+            }
+            const enteredPin = document.getElementById('admin_input_pin').value;
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+            fetch('/dashboard/verify-pin/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: new URLSearchParams({ 'pin': enteredPin })
+            }).then(r => r.json()).then(data => {
+                if (data.success) {
+                    isPinUnlocked = true;
+                    sessionStorage.setItem('admin_pin_unlocked', 'true');
+                    closePinModal();
+                    if (pinSuccessCallback) pinSuccessCallback();
+                } else {
+                    const errBox = document.getElementById('pinErrorMessage');
+                    errBox.innerText = data.error || 'Invalid Security PIN.';
+                    errBox.style.display = 'block';
+                }
+            }).catch(() => {
+                // Fallback check if PIN matches 1234
+                if (enteredPin === '1234') {
+                    isPinUnlocked = true;
+                    sessionStorage.setItem('admin_pin_unlocked', 'true');
+                    closePinModal();
+                    if (pinSuccessCallback) pinSuccessCallback();
+                } else {
+                    const errBox = document.getElementById('pinErrorMessage');
+                    errBox.innerText = 'Invalid Security PIN. Access Denied.';
+                    errBox.style.display = 'block';
+                }
+            });
+        }
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,55 @@
+{% extends 'dashboard/dashboard_base.html' %}
+
+{% block db_page_title %}Pricing Configuration{% endblock %}
+
+{% block db_content %}
+<div class="db-card-form">
+    <div style="margin-bottom: 32px;">
+        <h3>Pricing Rate Constants</h3>
+        <p style="color: var(--txt-dark-400);">Configure standard base price rates per scaife for Lapping, Coating, and Diamond Scaife services.</p>
+    </div>
+
+    <form method="POST">
+        {% csrf_token %}
+
+        {% if form.errors %}
+            <div style="background-color: rgba(239, 68, 68, 0.1); border-left: 4px solid var(--clr-danger); padding: 16px; border-radius: var(--border-radius-sm); margin-bottom: 24px; color: var(--clr-danger);">
+                <p><strong>Correction required:</strong></p>
+                <ul style="margin-left: 20px; margin-top: 8px;">
+                    {% for field in form %}
+                        {% for error in field.errors %}
+                            <li>{{ field.label }}: {{ error }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        <div class="form-grid-2" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px;">
+            <div class="form-group">
+                <label for="id_lapping_rate"><i class="fa-solid fa-compact-disc" style="color: var(--clr-primary);"></i> Lapping Rate (₹ / Scaife)</label>
+                <input type="number" step="0.01" name="lapping_rate" id="id_lapping_rate" value="{{ form.lapping_rate.value }}" class="form-control" required placeholder="150.00">
+                <small style="color: var(--txt-dark-400); display: block; margin-top: 4px;">Applied when Lapping is selected.</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="id_coating_rate"><i class="fa-solid fa-layer-group" style="color: #8b5cf6;"></i> Coating Rate (₹ / Scaife)</label>
+                <input type="number" step="0.01" name="coating_rate" id="id_coating_rate" value="{{ form.coating_rate.value }}" class="form-control" required placeholder="200.00">
+                <small style="color: var(--txt-dark-400); display: block; margin-top: 4px;">Applied when Coating is selected.</small>
+            </div>
+
+            <div class="form-group">
+                <label for="id_diamond_scaife_rate"><i class="fa-solid fa-gem" style="color: #06b6d4;"></i> Diamond Scaife Rate (₹ / Scaife)</label>
+                <input type="number" step="0.01" name="diamond_scaife_rate" id="id_diamond_scaife_rate" value="{{ form.diamond_scaife_rate.value|default:'300.00' }}" class="form-control" required placeholder="300.00">
+                <small style="color: var(--txt-dark-400); display: block; margin-top: 4px;">Applied when Diamond Scaife is selected.</small>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 16px; margin-top: 40px; justify-content: flex-end;">
+            <button type="submit" class="btn btn-primary" style="padding: 12px 32px;">
+                <i class="fa-solid fa-circle-check"></i> Update Pricing Constants
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

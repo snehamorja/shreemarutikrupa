@@ -1,0 +1,266 @@
+{% extends 'dashboard/dashboard_base.html' %}
+
+{% block db_page_title %}{% if is_admin %}All Scaife Entries{% else %}{{ office_label }} — Scaife Records{% endif %}{% endblock %}
+
+{% block db_content %}
+{% if notify_entry %}
+<div style="background: linear-gradient(135deg, #059669, #10b981); color: white; padding: 18px 24px; border-radius: 14px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; box-shadow: 0 4px 14px rgba(16,185,129,0.3);">
+    <div>
+        <h4 style="color: white; margin: 0 0 4px; font-size: 1.05rem;"><i class="fa-brands fa-whatsapp"></i> Scaife Entry Saved Successfully!</h4>
+        <p style="margin: 0; color: rgba(255,255,255,0.9); font-size: 0.85rem;">
+            Office: <strong>{{ notify_entry.client_name }}</strong> | Quantity: <strong>{{ notify_entry.quantity }}</strong> | Total Bill: <strong>₹{{ notify_entry.cost|floatformat:2 }}</strong>
+            {% if notify_entry.needs_repair %} | <span style="background: #f59e0b; color: white; padding: 2px 6px; border-radius: 4px; font-weight: 700; font-size: 0.75rem;">Under Repair</span>{% endif %}
+        </p>
+    </div>
+    <a href="{{ notify_wp_url }}" target="_blank" id="btn_send_wp" class="btn" style="background: #25d366; color: white; font-weight: 700; border: none; padding: 12px 24px; font-size: 0.95rem; border-radius: 30px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 3px 10px rgba(37,211,102,0.4);">
+        <i class="fa-brands fa-whatsapp" style="font-size: 1.3rem;"></i> Send Details to Admin via WhatsApp
+    </a>
+</div>
+{% endif %}
+<div class="db-panel" style="margin-bottom: 24px;">
+    <!-- Top actions bar -->
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+        <div>
+            <h3 style="font-size: 1.2rem;">
+                {% if is_admin %}<i class="fa-solid fa-globe"></i> All Offices — Active Scaife Registry (Last 24h){% else %}<i class="fa-solid fa-building" style="color: var(--clr-primary);"></i> {{ office_label }} — Active Scaife Records (Last 24h){% endif %}
+            </h3>
+            <p style="color: var(--txt-dark-400); font-size: 0.85rem; margin-top: 4px;">
+                Showing active entries from the last 24 hours. Older entries are stored in History & Archives.
+            </p>
+        </div>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+            <a href="{% url 'scaife_history' %}" class="btn btn-outline" style="padding: 10px 20px; border-color: var(--clr-primary); color: var(--clr-primary);">
+                <i class="fa-solid fa-clock-rotate-left"></i> History & Archives
+            </a>
+            {% if user.profile.role == 'admin' or user.profile.role == 'manager' %}
+                <a href="{% url 'scaife_create' %}" class="btn btn-primary" style="padding: 10px 20px;"><i class="fa-solid fa-circle-plus"></i> New Scaife Entry</a>
+            {% endif %}
+            
+            <!-- Excel & PDF downloads mapping current search query parameters -->
+            <a href="{% url 'export_excel' %}?q={{ query }}&office={{ filter_office }}" class="btn btn-outline" style="padding: 10px 20px; border-color: var(--clr-success); color: var(--clr-success);"><i class="fa-solid fa-file-excel"></i> Export Excel</a>
+            <a href="{% url 'export_pdf' %}?q={{ query }}&office={{ filter_office }}" class="btn btn-outline" style="padding: 10px 20px; border-color: var(--clr-danger); color: var(--clr-danger);"><i class="fa-solid fa-file-pdf"></i> Export PDF</a>
+        </div>
+    </div>
+</div>
+
+<!-- ── Upper Active Scaife Summary KPI Widgets ── -->
+<div class="widgets-grid" style="margin-bottom: 24px;">
+    <div class="widget-card">
+        <div class="widget-details">
+            <span>Total Active Scaifes</span>
+            <div class="widget-value" style="color: var(--clr-primary);">{{ total_active_scaifes }}</div>
+        </div>
+        <div class="widget-icon blue"><i class="fa-solid fa-boxes-stacked"></i></div>
+    </div>
+    
+    <div class="widget-card">
+        <div class="widget-details">
+            <span>Lapping Total</span>
+            <div class="widget-value" style="color: #0ea5e9;">{{ lapping_total }}</div>
+        </div>
+        <div class="widget-icon blue"><i class="fa-solid fa-compact-disc"></i></div>
+    </div>
+
+    <div class="widget-card">
+        <div class="widget-details">
+            <span>Coating Total</span>
+            <div class="widget-value" style="color: #8b5cf6;">{{ coating_total }}</div>
+        </div>
+        <div class="widget-icon amber"><i class="fa-solid fa-flask"></i></div>
+    </div>
+
+    <div class="widget-card">
+        <div class="widget-details">
+            <span>Diamond Scaife Total</span>
+            <div class="widget-value" style="color: #06b6d4;">{{ diamond_total }}</div>
+        </div>
+        <div class="widget-icon green"><i class="fa-solid fa-gem"></i></div>
+    </div>
+</div>
+
+<!-- ── Service Filter Pills Bar ── -->
+<div class="db-panel" style="margin-bottom: 16px; padding: 16px 24px;">
+    <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+        <span style="font-size: 0.8rem; font-weight: 700; color: var(--txt-dark-500); text-transform: uppercase; letter-spacing: 1px; margin-right: 4px;">
+            <i class="fa-solid fa-filter"></i> Service Filter:
+        </span>
+
+        <!-- All Services -->
+        <a href="{% url 'scaife_list' %}?q={{ query }}&office={{ filter_office }}&service="
+           style="padding: 7px 16px; border-radius: 30px; font-weight: 600; font-size: 0.85rem; text-decoration: none; transition: all 0.2s;
+                  {% if not filter_service %}background: var(--clr-primary); color: white; border: 2px solid var(--clr-primary);{% else %}background: white; color: var(--txt-dark-600); border: 2px solid #e2e8f0;{% endif %}">
+            <i class="fa-solid fa-layer-group"></i> All Services
+        </a>
+
+        <!-- Lapping Only -->
+        <a href="{% url 'scaife_list' %}?q={{ query }}&office={{ filter_office }}&service=lapping"
+           style="padding: 7px 16px; border-radius: 30px; font-weight: 600; font-size: 0.85rem; text-decoration: none; transition: all 0.2s;
+                  {% if filter_service == 'lapping' %}background: #0ea5e9; color: white; border: 2px solid #0ea5e9;{% else %}background: #f0f9ff; color: #0369a1; border: 2px solid #bae6fd;{% endif %}">
+            <i class="fa-solid fa-compact-disc"></i> Lapping
+        </a>
+
+        <!-- Coating Only -->
+        <a href="{% url 'scaife_list' %}?q={{ query }}&office={{ filter_office }}&service=coating"
+           style="padding: 7px 16px; border-radius: 30px; font-weight: 600; font-size: 0.85rem; text-decoration: none; transition: all 0.2s;
+                  {% if filter_service == 'coating' %}background: #8b5cf6; color: white; border: 2px solid #8b5cf6;{% else %}background: #f5f3ff; color: #6d28d9; border: 2px solid #ddd6fe;{% endif %}">
+            <i class="fa-solid fa-flask"></i> Coating
+        </a>
+
+        <!-- Diamond Scaife Only -->
+        <a href="{% url 'scaife_list' %}?q={{ query }}&office={{ filter_office }}&service=diamond"
+           style="padding: 7px 16px; border-radius: 30px; font-weight: 600; font-size: 0.85rem; text-decoration: none; transition: all 0.2s;
+                  {% if filter_service == 'diamond' %}background: #06b6d4; color: white; border: 2px solid #06b6d4;{% else %}background: #ecfeff; color: #0e7490; border: 2px solid #a5f3fc;{% endif %}">
+            <i class="fa-solid fa-gem"></i> Diamond Scaife
+        </a>
+
+
+
+        {% if filter_service %}
+        <a href="{% url 'scaife_list' %}" style="margin-left: auto; font-size: 0.8rem; color: var(--clr-danger); font-weight: 600; text-decoration: none;">
+            <i class="fa-solid fa-xmark"></i> Clear Filter
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Search & Office Filters Bar -->
+<form method="GET" action="{% url 'scaife_list' %}" class="filter-bar" style="margin-bottom: 24px;">
+    <input type="hidden" name="service" value="{{ filter_service }}">
+    <div class="search-input">
+        <input type="text" name="q" value="{{ query }}" placeholder="Search client company name...">
+    </div>
+
+    {% if is_admin %}
+    <select name="office" class="filter-select" onchange="this.form.submit()">
+        <option value="">All Offices</option>
+        {% for office in offices %}
+            <option value="{{ office.id }}" {% if filter_office == office.id|stringformat:"s" %}selected{% endif %}>{{ office.name }}</option>
+        {% endfor %}
+    </select>
+    {% endif %}
+    
+    <button type="submit" class="btn btn-dark" style="padding: 10px 20px;"><i class="fa-solid fa-filter"></i> Apply</button>
+    {% if query or filter_office or filter_service %}
+        <a href="{% url 'scaife_list' %}" class="btn btn-outline" style="padding: 10px 20px; border-color: var(--bg-dark-700); color: var(--bg-dark-700);">Clear</a>
+    {% endif %}
+</form>
+
+<!-- Main Table List -->
+<div class="db-panel">
+    <div class="table-responsive">
+        <table class="db-table">
+            <thead>
+                <tr>
+                    <th>Client Name</th>
+                    <th>Quantity</th>
+                    <th>Selected Services</th>
+                    <th>Repair</th>
+                    <th>Total Bill (₹)</th>
+                    <th>Office</th>
+                    <th>Received Date</th>
+                    <th style="text-align: right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for scaife in scaife_entries %}
+                    <tr style="{% if scaife.needs_repair %}background: rgba(245,158,11,0.04);{% endif %}">
+                        <td>
+                            <strong style="color: var(--txt-dark-900); font-size: 0.95rem;">{{ scaife.client_name }}</strong>
+                            {% if scaife.needs_repair and scaife.repair_details %}
+                            <div style="font-size: 0.75rem; color: #b45309; margin-top: 2px;"><i class="fa-solid fa-screwdriver-wrench"></i> {{ scaife.repair_details|truncatechars:60 }}</div>
+                            {% endif %}
+                        </td>
+                        <td><span class="badge badge-received"><i class="fa-solid fa-layer-group"></i> {{ scaife.quantity }} Scaife{% if scaife.quantity > 1 %}s{% endif %}</span></td>
+                        <td>
+                            {% if filter_service == 'lapping' %}
+                                <strong style="color: #0ea5e9; font-size: 0.88rem;"><i class="fa-solid fa-compact-disc"></i> Lapping</strong>
+                            {% elif filter_service == 'coating' %}
+                                <strong style="color: #8b5cf6; font-size: 0.88rem;"><i class="fa-solid fa-flask"></i> Coating</strong>
+                            {% elif filter_service == 'diamond' %}
+                                <strong style="color: #06b6d4; font-size: 0.88rem;"><i class="fa-solid fa-gem"></i> Diamond Scaife</strong>
+                            {% else %}
+                                <strong style="color: var(--clr-primary); font-size: 0.88rem;">{{ scaife.get_services_display }}</strong>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if scaife.needs_repair %}
+                            <span style="display: inline-flex; align-items: center; gap: 5px; background: rgba(245,158,11,0.12); color: #92400e; border: 1px solid #fbbf24; padding: 3px 10px; border-radius: 20px; font-size: 0.78rem; font-weight: 700;">
+                                <i class="fa-solid fa-screwdriver-wrench"></i> Repair
+                            </span>
+                            {% else %}
+                            <span style="color: var(--txt-dark-300); font-size: 0.8rem;">—</span>
+                            {% endif %}
+                        </td>
+                        <td><strong style="color: var(--clr-success); font-size: 1rem;">₹{{ scaife.cost|floatformat:2 }}</strong></td>
+                        <td><small style="color: var(--txt-dark-500);">{{ scaife.assigned_office.name|default:"General" }}</small></td>
+                        <td><small style="color: var(--txt-dark-500);">{{ scaife.received_date|date:"d M Y" }}</small></td>
+                        <td style="text-align: right;">
+                            <div style="display: inline-flex; gap: 8px;">
+                                <button type="button" onclick="sendRowToWhatsApp('{{ scaife.client_name }}', '{{ scaife.quantity }}', '{{ scaife.cost|floatformat:2 }}', '{{ scaife.assigned_office.name|default:"General" }}', '{% if scaife.needs_repair %}UNDER REPAIR: {{ scaife.repair_details|escapejs }}{% else %}No Repair{% endif %}')" class="btn btn-outline" style="padding: 6px 12px; font-size: 0.8rem; border-color: #25d366; color: #16a34a;" title="Send details to Admin via WhatsApp">
+                                    <i class="fa-brands fa-whatsapp"></i> Send
+                                </button>
+                                <a href="{% url 'scaife_edit' scaife.pk %}" class="btn btn-outline" style="padding: 6px 12px; font-size: 0.8rem; border-color: var(--clr-primary); color: var(--clr-primary);">
+                                    <i class="fa-solid fa-pen"></i> Edit
+                                </a>
+                                {% if user.profile.role == 'admin' %}
+                                    <a href="{% url 'scaife_delete' scaife.pk %}" class="btn btn-outline" style="padding: 6px 12px; font-size: 0.8rem; border-color: var(--clr-danger); color: var(--clr-danger);" onclick="return confirm('Are you sure you want to delete this scaife entry?');">
+                                        <i class="fa-solid fa-trash"></i> Delete
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center" style="padding: 40px; color: var(--txt-dark-400);">No scaife entries match selection.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Table Pagination -->
+    {% if is_paginated %}
+        <div class="pagination">
+            <span class="pagination-info">
+                Showing page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            </span>
+            <div class="pagination-links">
+                {% if page_obj.has_previous %}
+                    <a href="?page=1{% if query %}&q={{ query }}{% endif %}{% if filter_office %}&office={{ filter_office }}{% endif %}" class="page-btn"><i class="fa-solid fa-angles-left"></i></a>
+                    <a href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if filter_office %}&office={{ filter_office }}{% endif %}" class="page-btn"><i class="fa-solid fa-angle-left"></i></a>
+                {% endif %}
+                
+                <span class="page-btn active">{{ page_obj.number }}</span>
+                
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if filter_office %}&office={{ filter_office }}{% endif %}" class="page-btn"><i class="fa-solid fa-angle-right"></i></a>
+                    <a href="?page={{ page_obj.paginator.num_pages }}{% if query %}&q={{ query }}{% endif %}{% if filter_office %}&office={{ filter_office }}{% endif %}" class="page-btn"><i class="fa-solid fa-angles-right"></i></a>
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+function sendRowToWhatsApp(client, qty, cost, office, repair) {
+    const adminWp = '{{ admin_wp }}';
+    const text = `🏢 *SCAIFE ENTRY NOTIFICATION*\n📍 Office: ${office}\n👤 Client: ${client}\n📦 Quantity: ${qty} Scaife(s)\n🛠️ Repair: ${repair}\n💰 Total Bill: ₹${cost}`;
+    const encoded = encodeURIComponent(text);
+    const url = adminWp ? `https://wa.me/${adminWp}?text=${encoded}` : `https://wa.me/?text=${encoded}`;
+    window.open(url, '_blank');
+}
+
+{% if auto_open_wp and notify_wp_url %}
+document.addEventListener('DOMContentLoaded', function() {
+    const wpUrl = "{{ notify_wp_url|safe }}";
+    // Attempt to auto-open WhatsApp link in a new tab/app immediately
+    const wpWindow = window.open(wpUrl, '_blank');
+    if (!wpWindow || wpWindow.closed || typeof wpWindow.closed === 'undefined') {
+        // If popup block is active, fallback to showing visual alert or trying direct location change
+        console.log("WhatsApp popup was blocked. Managers can click the green button above.");
+    }
+});
+{% endif %}
+</script>
+{% endblock %}

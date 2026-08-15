@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block title %}Privacy Policy | {{ branding.company_name }}{% endblock %}
+
+{% block content %}
+<section class="section-padding" style="background-color: var(--bg-light-200); text-align: center; padding: 40px 0;">
+    <div class="container">
+        <h1 style="font-size: 2.5rem;">Privacy Policy</h1>
+        <p style="color: var(--txt-dark-400);">Last Updated: August 2026</p>
+    </div>
+</section>
+
+<section class="section-padding">
+    <div class="container" style="max-width: 800px; line-height: 1.8;">
+        <h3>1. Information We Collect</h3>
+        <p style="margin-bottom: 24px;">When you visit our site or submit an inquiry, we collect basic details you enter: your name, email, telephone number, and message details. On the admin dashboard, we collect login activity logs and audit trail parameters (actions executed by users) to maintain accountability.</p>
+
+        <h3>2. How We Use Information</h3>
+        <p style="margin-bottom: 24px;">We use customer inquiry details to provide quotes and answers. User authentication and action logging are handled strictly for administrative logging. We do not sell or lease collected details to third parties.</p>
+
+        <h3>3. Cookies</h3>
+        <p style="margin-bottom: 24px;">We use cookies strictly for session tracking (e.g., maintaining logins for managers and workers on our dashboard portals) and Cross-Site Request Forgery (CSRF) protection on forms.</p>
+
+        <h3>4. Security</h3>
+        <p style="margin-bottom: 24px;">We maintain data security protocols via Django's secure ORM, hashed passwords, and database file storage to secure your database records.</p>
+    </div>
+</section>
+{% endblock %}

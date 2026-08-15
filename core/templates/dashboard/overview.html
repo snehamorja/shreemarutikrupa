@@ -1,0 +1,268 @@
+{% extends 'dashboard/dashboard_base.html' %}
+{% load static %}
+
+{% block db_page_title %}
+    {% if is_admin %}Global Dashboard{% else %}{{ office_label }} — Dashboard{% endif %}
+{% endblock %}
+
+{% block db_content %}
+
+<!-- Office Context Banner -->
+<div style="background: {% if is_admin %}linear-gradient(135deg, var(--bg-dark-900), var(--bg-dark-800)){% else %}linear-gradient(135deg, #0c4a6e, #0369a1){% endif %}; color: white; padding: 20px 32px; border-radius: var(--border-radius-md); margin-bottom: 32px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+    <div>
+        <div style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px; color: rgba(255,255,255,0.6); margin-bottom: 6px;">
+            {% if is_admin %}<i class="fa-solid fa-globe"></i> Global View — All Offices{% else %}<i class="fa-solid fa-building"></i> {{ user.profile.get_role_display }} — {{ office_label }}{% endif %}
+        </div>
+        <h2 style="color: white; font-size: 1.75rem; margin: 0;">
+            {% if is_admin %}Master Overview Dashboard{% else %}{{ office_label }}{% endif %}
+        </h2>
+        {% if office_obj %}
+            <p style="color: rgba(255,255,255,0.7); font-size: 0.9rem; margin-top: 6px;">
+                <i class="fa-solid fa-map-pin"></i> {{ office_obj.location }} &nbsp;|&nbsp;
+                <i class="fa-solid fa-phone"></i> {{ office_obj.phone }}
+            </p>
+        {% endif %}
+    </div>
+    <div style="text-align: right;">
+        <div style="font-size: 0.75rem; color: rgba(255,255,255,0.5);">Period Scope</div>
+        <div style="font-size: 1rem; font-weight: 600;">All Time Records</div>
+    </div>
+</div>
+
+<!-- KPI Widgets -->
+<div class="widgets-grid">
+    <div class="widget-card">
+        <div class="widget-details">
+            <span>Active Scaifes{% if not is_admin %} (This Office){% endif %}</span>
+            <div class="widget-value">{{ scaifes_total }}</div>
+        </div>
+        <div class="widget-icon blue"><i class="fa-solid fa-compact-disc"></i></div>
+    </div>
+
+
+    <div class="widget-card">
+        <div class="widget-details">
+            <span>Total Billing (All)</span>
+            <div class="widget-value" style="font-size: 1.5rem;">₹{{ total_revenue|floatformat:0 }}</div>
+        </div>
+        <div class="widget-icon green"><i class="fa-solid fa-indian-rupee-sign"></i></div>
+    </div>
+
+
+    {% if is_admin and inquiries_new is not None %}
+    <div class="widget-card">
+        <div class="widget-details">
+            <span>New Inquiries</span>
+            <div class="widget-value">{{ inquiries_new }}</div>
+        </div>
+        <div class="widget-icon red"><i class="fa-solid fa-envelope-open-text"></i></div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Charts Row -->
+<div class="db-panel" style="margin-bottom: 32px;">
+    <div class="db-panel-header">
+        <h3>Monthly Scaifes Received — {% if is_admin %}All Offices{% else %}{{ office_label }}{% endif %}</h3>
+        <span style="font-size: 0.8rem; color: var(--txt-dark-400);">Last 6 Months</span>
+    </div>
+    <div style="height: 280px; position: relative;">
+        <canvas id="salesChart"></canvas>
+    </div>
+</div>
+
+<!-- Admin Only: Per-Office Breakdown Table -->
+{% if is_admin and office_breakdown %}
+<div class="db-panel" style="margin-bottom: 32px;">
+    <div class="db-panel-header">
+        <h3><i class="fa-solid fa-building-user"></i> Per-Office Breakdown</h3>
+        <span style="font-size: 0.85rem; color: var(--txt-dark-400);">Individual office performance summary</span>
+    </div>
+    <div class="table-responsive">
+        <table class="db-table">
+            <thead>
+                <tr>
+                    <th>Office Name</th>
+                    <th>Total Scaifes</th>
+                    <th>Total Billing (INR)</th>
+                    <th>View</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for office in office_breakdown %}
+                <tr>
+                    <td>
+                        <strong><i class="fa-solid fa-building" style="color: var(--clr-primary);"></i> {{ office.name }}</strong>
+                        <div style="font-size: 0.78rem; color: var(--txt-dark-400); margin-top: 2px;"><i class="fa-solid fa-map-pin"></i> {{ office.location }}</div>
+                    </td>
+                    <td><strong>{{ office.total }}</strong></td>
+                    <td><strong style="color: var(--clr-success);">₹{{ office.revenue|floatformat:0 }}</strong></td>
+                    <td>
+                        <a href="{% url 'scaife_list' %}?office={{ office.id }}" class="btn btn-outline" style="padding: 5px 12px; font-size: 0.8rem;">
+                            <i class="fa-solid fa-eye"></i> View Scaifes
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+<!-- Recent Active Scaifes + Recent Inquiries (2 column) -->
+<div class="dashboard-grid" style="grid-template-columns: {% if is_admin %}1fr 1fr{% else %}1fr{% endif %};">
+    <!-- Recent Active Scaifes -->
+    <div class="db-panel">
+        <div class="db-panel-header">
+            <h3>Active Scaifes{% if not is_admin %} — {{ office_label }}{% endif %}</h3>
+            <a href="{% url 'scaife_list' %}" style="font-size: 0.85rem; color: var(--clr-primary); font-weight: 600;">View All →</a>
+        </div>
+        <div class="table-responsive">
+            <table class="db-table">
+                <thead>
+                    <tr>
+                        <th>Client</th>
+                        {% if is_admin %}<th>Office</th>{% endif %}
+                        <th>Status</th>
+                        <th>Repair</th>
+                        <th>Bill</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for scaife in recent_scaifes %}
+                    <tr style="{% if scaife.needs_repair %}background: rgba(245,158,11,0.04);{% endif %}">
+                        <td>
+                            {{ scaife.client_name }}
+                            {% if scaife.needs_repair and scaife.repair_details %}
+                            <div style="font-size: 0.72rem; color: #b45309; margin-top: 2px;"><i class="fa-solid fa-screwdriver-wrench"></i> {{ scaife.repair_details|truncatechars:45 }}</div>
+                            {% endif %}
+                        </td>
+                        {% if is_admin %}<td>{{ scaife.assigned_office.name }}</td>{% endif %}
+                        <td><span class="badge badge-{{ scaife.status }}">{{ scaife.get_status_display }}</span></td>
+                        <td>
+                            {% if scaife.needs_repair %}
+                            <span style="display: inline-flex; align-items: center; gap: 4px; background: rgba(245,158,11,0.12); color: #92400e; border: 1px solid #fbbf24; padding: 2px 8px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; white-space: nowrap;">
+                                <i class="fa-solid fa-screwdriver-wrench"></i> Repair
+                            </span>
+                            {% else %}<span style="color: var(--txt-dark-300); font-size: 0.8rem;">—</span>{% endif %}
+                        </td>
+                        <td>₹{{ scaife.cost|floatformat:0 }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="{% if is_admin %}7{% else %}6{% endif %}" class="text-center" style="padding: 30px; color: var(--txt-dark-400);">No active entries found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Recent Inquiries (Admin only) -->
+    {% if is_admin %}
+    <div class="db-panel">
+        <div class="db-panel-header">
+            <h3>Recent Website Inquiries</h3>
+        </div>
+        <div class="table-responsive">
+            <table class="db-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Name</th>
+                        <th>Subject</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for inquiry in recent_inquiries %}
+                    <tr>
+                        <td>{{ inquiry.created_at|date:"d M" }}</td>
+                        <td><strong>{{ inquiry.name }}</strong></td>
+                        <td>{{ inquiry.subject }}</td>
+                        <td>
+                            <span class="badge badge-{% if inquiry.status == 'new' %}received{% elif inquiry.status == 'contacted' %}lapping{% else %}ready{% endif %}">
+                                {{ inquiry.get_status_display }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center" style="padding: 30px; color: var(--txt-dark-400);">No inquiries yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Monthly Volume + Revenue dual-axis chart
+    const ctxSales = document.getElementById('salesChart').getContext('2d');
+    new Chart(ctxSales, {
+        type: 'bar',
+        data: {
+            labels: {{ months_labels|safe }},
+            datasets: [
+                {
+                    label: 'Scaifes Received',
+                    data: {{ monthly_counts|safe }},
+                    backgroundColor: 'rgba(14, 165, 233, 0.7)',
+                    borderColor: 'rgba(14, 165, 233, 1)',
+                    borderWidth: 2,
+                    borderRadius: 6,
+                    yAxisID: 'y',
+                },
+                {
+                    label: 'Revenue (₹)',
+                    data: {{ monthly_revenue|safe }},
+                    type: 'line',
+                    borderColor: 'rgba(245, 158, 11, 1)',
+                    backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    fill: true,
+                    yAxisID: 'y1',
+                    pointRadius: 4,
+                    pointBackgroundColor: 'rgba(245, 158, 11, 1)',
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { stepSize: 1, color: '#64748b' },
+                    title: { display: true, text: 'Scaifes Count', color: '#64748b' }
+                },
+                y1: {
+                    position: 'right',
+                    beginAtZero: true,
+                    grid: { drawOnChartArea: false },
+                    ticks: { 
+                        color: '#64748b',
+                        callback: v => '₹' + v.toLocaleString('en-IN')
+                    },
+                    title: { display: true, text: 'Revenue (₹)', color: '#64748b' }
+                }
+            },
+            plugins: {
+                legend: { labels: { color: '#334155' } }
+            }
+        }
+    });
+
+});
+</script>
+{% endblock %}

@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Contact Us | {{ branding.company_name }}{% endblock %}
+
+{% block content %}
+<!-- Subheader Banner -->
+<section class="section-padding" style="background: linear-gradient(135deg, var(--bg-dark-900) 0%, var(--bg-dark-800) 100%); color: white; padding: 60px 0; text-align: center;">
+    <div class="container">
+        <h1 style="color: white; font-size: 3rem; margin-bottom: 12px;">Contact Our Offices</h1>
+        <p style="color: var(--txt-light-300); max-width: 600px; margin: 0 auto;">Have queries regarding custom pricing, batch processing, or office drop-offs? Send us a message or find our locations.</p>
+    </div>
+</section>
+
+<!-- Contact Section -->
+<section class="section-padding">
+    <div class="container contact-grid">
+        
+        <!-- Left: Address & Mapping info -->
+        <div class="contact-info-panel">
+            <div class="contact-info-card">
+                <div class="info-icon"><i class="fa-solid fa-map-location-dot"></i></div>
+                <div class="info-details">
+                    <h4>Main Factory Address</h4>
+                    <p>{% if branding %}{{ branding.address }}{% else %}Ichhapore GIDC, Surat, Gujarat{% endif %}</p>
+                </div>
+            </div>
+
+            <div class="contact-info-card">
+                <div class="info-icon"><i class="fa-solid fa-phone-volume"></i></div>
+                <div class="info-details">
+                    <h4>Call or WhatsApp</h4>
+                    <p>Phone: {% if branding %}{{ branding.contact_phone }}{% else %}+91 98765 43210{% endif %}</p>
+                    <p style="margin-top: 10px;">
+                        <!-- WhatsApp button -->
+                        {% if branding and branding.whatsapp_number %}
+                            <a href="https://wa.me/{{ branding.whatsapp_number|cut:' '|cut:'+' }}" class="btn btn-secondary" style="padding: 6px 14px; font-size: 0.85rem;" target="_blank">
+                                <i class="fa-brands fa-whatsapp"></i> Chat on WhatsApp
+                            </a>
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+
+            <div class="contact-info-card">
+                <div class="info-icon"><i class="fa-solid fa-envelope-open-text"></i></div>
+                <div class="info-details">
+                    <h4>Email Enquiries</h4>
+                    <p>{% if branding %}{{ branding.contact_email }}{% else %}info@apexscaife.com{% endif %}</p>
+                </div>
+            </div>
+
+            <!-- Map Container -->
+            <div class="map-container">
+                {% if branding and branding.google_map_embed %}
+                    <iframe src="{{ branding.google_map_embed }}" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+                {% else %}
+                    <div style="height: 100%; display: flex; align-items: center; justify-content: center; background-color: var(--bg-light-300);">
+                        <span>Google Map Placeholder</span>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Right: Contact Form Panel -->
+        <div class="contact-form-panel">
+            <h3 style="font-size: 1.75rem; margin-bottom: 8px;">Submit Inquiry</h3>
+            <p style="color: var(--txt-dark-400); margin-bottom: 32px;">Please fill out the form below. Our managers will review details and follow up within 24 hours.</p>
+            
+            <form method="POST" action="{% url 'contact' %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="name">Your Name</label>
+                    <input type="text" name="name" id="name" class="form-control" placeholder="Enter full name" required>
+                </div>
+
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" name="email" id="email" class="form-control" placeholder="name@company.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="text" name="phone" id="phone" class="form-control" placeholder="+91 99887 76655" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="subject">Subject</label>
+                    <input type="text" name="subject" id="subject" class="form-control" placeholder="E.g., Coating Pricing, Bulk Orders" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="message">Message Description</label>
+                    <textarea name="message" id="message" class="form-control" placeholder="Detail your requirements..." required></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    <i class="fa-solid fa-paper-plane"></i> Send Message
+                </button>
+            </form>
+        </div>
+
+    </div>
+</section>
+{% endblock %}

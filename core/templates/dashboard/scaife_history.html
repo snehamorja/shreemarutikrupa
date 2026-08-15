@@ -1,0 +1,272 @@
+{% extends 'dashboard/dashboard_base.html' %}
+
+{% block db_page_title %}Historical & Archived Scaife Records{% endblock %}
+
+{% block db_content %}
+<div class="db-panel" style="margin-bottom: 24px;">
+    <!-- Top actions bar -->
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+        <div>
+            <h3 style="font-size: 1.2rem;">
+                <i class="fa-solid fa-clock-rotate-left" style="color: var(--clr-primary);"></i> 
+                Historical Records & Archives {% if not is_admin %}— {{ office_label }}{% endif %}
+            </h3>
+            <p style="color: var(--txt-dark-400); font-size: 0.85rem; margin-top: 4px;">
+                Filter scaife entries by past month, year, or custom date range.
+            </p>
+        </div>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+            <a href="{% url 'scaife_list' %}" class="btn btn-outline" style="padding: 10px 20px;">
+                <i class="fa-solid fa-bolt"></i> Live Entries (24h)
+            </a>
+            <a href="{% url 'export_excel' %}?q={{ query }}&status={{ filter_status }}&office={{ filter_office }}&year={{ filter_year }}&month={{ filter_month }}&from={{ date_from }}&to={{ date_to }}&service={{ filter_service }}" class="btn btn-outline" style="padding: 10px 20px; border-color: var(--clr-success); color: var(--clr-success);">
+                <i class="fa-solid fa-file-excel"></i> Export Excel
+            </a>
+            <a href="{% url 'export_pdf' %}?q={{ query }}&status={{ filter_status }}&office={{ filter_office }}&year={{ filter_year }}&month={{ filter_month }}&from={{ date_from }}&to={{ date_to }}&service={{ filter_service }}" class="btn btn-outline" style="padding: 10px 20px; border-color: var(--clr-danger); color: var(--clr-danger);">
+                <i class="fa-solid fa-file-pdf"></i> Export PDF
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Historical KPI Summary -->
+<div class="widgets-grid" style="margin-bottom: 24px;">
+    <div class="widget-card">
+        <div class="widget-details">
+            <span>Filtered Total Entries</span>
+            <div class="widget-value">{{ total_count }}</div>
+        </div>
+        <div class="widget-icon blue"><i class="fa-solid fa-boxes-stacked"></i></div>
+    </div>
+    <div class="widget-card">
+        <div class="widget-details">
+            <span>Filtered Revenue</span>
+            <div class="widget-value" style="font-size: 1.5rem;">₹{{ total_revenue|floatformat:0 }}</div>
+        </div>
+        <div class="widget-icon green"><i class="fa-solid fa-indian-rupee-sign"></i></div>
+    </div>
+    <div class="widget-card">
+        <div class="widget-details">
+            <span>Completed / Delivered</span>
+            <div class="widget-value">{{ delivered_count }}</div>
+        </div>
+        <div class="widget-icon blue"><i class="fa-solid fa-circle-check"></i></div>
+    </div>
+</div>
+
+<!-- Service Quick-Filter Pill Bar -->
+<div class="db-panel" style="margin-bottom: 16px; padding: 18px 24px;">
+    <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+        <span style="font-size: 0.82rem; font-weight: 700; color: var(--txt-dark-500); text-transform: uppercase; letter-spacing: 1px; margin-right: 4px;">
+            <i class="fa-solid fa-filter"></i> Filter by Service:
+        </span>
+
+        <a href="{% url 'scaife_history' %}?q={{ query }}&status={{ filter_status }}&office={{ filter_office }}&year={{ filter_year }}&month={{ filter_month }}&from={{ date_from }}&to={{ date_to }}&service="
+           style="padding: 8px 20px; border-radius: 30px; font-weight: 600; font-size: 0.88rem; text-decoration: none; transition: all 0.2s;
+                  {% if not filter_service %}background: var(--clr-primary); color: white; border: 2px solid var(--clr-primary);{% else %}background: white; color: var(--txt-dark-600); border: 2px solid #e2e8f0;{% endif %}">
+            <i class="fa-solid fa-layer-group"></i> All Services
+        </a>
+
+        <a href="{% url 'scaife_history' %}?q={{ query }}&status={{ filter_status }}&office={{ filter_office }}&year={{ filter_year }}&month={{ filter_month }}&from={{ date_from }}&to={{ date_to }}&service=lapping"
+           style="padding: 8px 20px; border-radius: 30px; font-weight: 600; font-size: 0.88rem; text-decoration: none; transition: all 0.2s;
+                  {% if filter_service == 'lapping' %}background: #0ea5e9; color: white; border: 2px solid #0ea5e9;{% else %}background: #f0f9ff; color: #0369a1; border: 2px solid #bae6fd;{% endif %}">
+            <i class="fa-solid fa-compact-disc"></i> Lapping
+        </a>
+
+        <a href="{% url 'scaife_history' %}?q={{ query }}&status={{ filter_status }}&office={{ filter_office }}&year={{ filter_year }}&month={{ filter_month }}&from={{ date_from }}&to={{ date_to }}&service=coating"
+           style="padding: 8px 20px; border-radius: 30px; font-weight: 600; font-size: 0.88rem; text-decoration: none; transition: all 0.2s;
+                  {% if filter_service == 'coating' %}background: #8b5cf6; color: white; border: 2px solid #8b5cf6;{% else %}background: #f5f3ff; color: #6d28d9; border: 2px solid #ddd6fe;{% endif %}">
+            <i class="fa-solid fa-flask"></i> Coating
+        </a>
+
+        <a href="{% url 'scaife_history' %}?q={{ query }}&status={{ filter_status }}&office={{ filter_office }}&year={{ filter_year }}&month={{ filter_month }}&from={{ date_from }}&to={{ date_to }}&service=diamond"
+           style="padding: 8px 20px; border-radius: 30px; font-weight: 600; font-size: 0.88rem; text-decoration: none; transition: all 0.2s;
+                  {% if filter_service == 'diamond' %}background: #06b6d4; color: white; border: 2px solid #06b6d4;{% else %}background: #ecfeff; color: #0e7490; border: 2px solid #a5f3fc;{% endif %}">
+            <i class="fa-solid fa-gem"></i> Diamond Scaife
+        </a>
+
+
+
+        {% if filter_service %}
+        <a href="{% url 'scaife_history' %}" style="margin-left: auto; font-size: 0.82rem; color: var(--clr-danger); font-weight: 600; text-decoration: none;">
+            <i class="fa-solid fa-xmark"></i> Clear Filter
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Advanced Filters Bar -->
+<div class="db-panel" style="margin-bottom: 24px;">
+    <h4 style="margin-bottom: 16px; font-size: 1rem; color: var(--txt-dark-700);">
+        <i class="fa-solid fa-filter"></i> Filter Historical Data
+    </h4>
+    <form method="GET" action="{% url 'scaife_history' %}" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; align-items: end;">
+        <div>
+            <label style="font-size: 0.8rem; font-weight: 600; color: var(--txt-dark-500); display: block; margin-bottom: 4px;">Search</label>
+            <input type="text" name="q" value="{{ query }}" placeholder="Serial or client..." class="form-control" style="padding: 8px 12px;">
+        </div>
+
+        <div>
+            <label style="font-size: 0.8rem; font-weight: 600; color: var(--txt-dark-500); display: block; margin-bottom: 4px;">Select Year</label>
+            <select name="year" class="form-control" style="padding: 8px 12px;">
+                <option value="">All Years</option>
+                {% for y in available_years %}
+                    <option value="{{ y }}" {% if filter_year == y|stringformat:"s" %}selected{% endif %}>{{ y }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div>
+            <label style="font-size: 0.8rem; font-weight: 600; color: var(--txt-dark-500); display: block; margin-bottom: 4px;">Select Month</label>
+            <select name="month" class="form-control" style="padding: 8px 12px;">
+                <option value="">All Months</option>
+                <option value="1" {% if filter_month == '1' %}selected{% endif %}>January</option>
+                <option value="2" {% if filter_month == '2' %}selected{% endif %}>February</option>
+                <option value="3" {% if filter_month == '3' %}selected{% endif %}>March</option>
+                <option value="4" {% if filter_month == '4' %}selected{% endif %}>April</option>
+                <option value="5" {% if filter_month == '5' %}selected{% endif %}>May</option>
+                <option value="6" {% if filter_month == '6' %}selected{% endif %}>June</option>
+                <option value="7" {% if filter_month == '7' %}selected{% endif %}>July</option>
+                <option value="8" {% if filter_month == '8' %}selected{% endif %}>August</option>
+                <option value="9" {% if filter_month == '9' %}selected{% endif %}>September</option>
+                <option value="10" {% if filter_month == '10' %}selected{% endif %}>October</option>
+                <option value="11" {% if filter_month == '11' %}selected{% endif %}>November</option>
+                <option value="12" {% if filter_month == '12' %}selected{% endif %}>December</option>
+            </select>
+        </div>
+
+        <div>
+            <label style="font-size: 0.8rem; font-weight: 600; color: var(--txt-dark-500); display: block; margin-bottom: 4px;">From Date</label>
+            <input type="date" name="from" value="{{ date_from }}" class="form-control" style="padding: 7px 12px;">
+        </div>
+
+        <div>
+            <label style="font-size: 0.8rem; font-weight: 600; color: var(--txt-dark-500); display: block; margin-bottom: 4px;">To Date</label>
+            <input type="date" name="to" value="{{ date_to }}" class="form-control" style="padding: 7px 12px;">
+        </div>
+
+
+
+        {% if is_admin %}
+        <div>
+            <label style="font-size: 0.8rem; font-weight: 600; color: var(--txt-dark-500); display: block; margin-bottom: 4px;">Office</label>
+            <select name="office" class="form-control" style="padding: 8px 12px;">
+                <option value="">All Offices</option>
+                {% for office in offices %}
+                    <option value="{{ office.id }}" {% if filter_office == office.id|stringformat:"s" %}selected{% endif %}>{{ office.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        {% endif %}
+
+        <div style="display: flex; gap: 8px;">
+            <button type="submit" class="btn btn-primary" style="padding: 8px 16px; flex-grow: 1;">
+                <i class="fa-solid fa-magnifying-glass"></i> Filter
+            </button>
+            <a href="{% url 'scaife_history' %}" class="btn btn-outline" style="padding: 8px 12px;">Clear</a>
+        </div>
+    </form>
+</div>
+
+<!-- Main Table List -->
+<div class="db-panel">
+    <div class="table-responsive">
+        <table class="db-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Client Name</th>
+                    <th>Quantity & Services</th>
+                    <th>Repair Status</th>
+                    <th>Total Bill (₹)</th>
+                    <th>Office</th>
+                    <th style="text-align: right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for scaife in scaife_entries %}
+                    <tr style="{% if scaife.needs_repair %}background: rgba(245,158,11,0.05);{% endif %}">
+                        <td>
+                            <small style="color: var(--txt-dark-600); font-weight: 600;">
+                                <i class="fa-regular fa-calendar-days"></i> {{ scaife.received_date|date:"d M Y" }}
+                            </small>
+                        </td>
+                        <td>
+                            <strong style="color: var(--txt-dark-900); font-size: 0.95rem;">{{ scaife.client_name }}</strong>
+                        </td>
+                        <td>
+                            <div style="display: flex; flex-direction: column; gap: 4px;">
+                                <span class="badge badge-received" style="width: fit-content;">
+                                    <i class="fa-solid fa-layer-group"></i> Total: {{ scaife.quantity }} Scaife{% if scaife.quantity > 1 %}s{% endif %}
+                                </span>
+                                <div style="font-size: 0.78rem; color: var(--txt-dark-600);">
+                                    {% if scaife.quantity_lapping > 0 %}
+                                        <span style="color: #0369a1; font-weight: 600;"><i class="fa-solid fa-compact-disc"></i> Lapping: {{ scaife.quantity_lapping }}</span>
+                                    {% endif %}
+                                    {% if scaife.quantity_coating > 0 %}
+                                        <span style="color: #6d28d9; font-weight: 600; margin-left: 6px;"><i class="fa-solid fa-flask"></i> Coating: {{ scaife.quantity_coating }}</span>
+                                    {% endif %}
+                                    {% if scaife.quantity_diamond > 0 %}
+                                        <span style="color: #0e7490; font-weight: 600; margin-left: 6px;"><i class="fa-solid fa-gem"></i> Diamond: {{ scaife.quantity_diamond }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            {% if scaife.needs_repair %}
+                            <div style="background: rgba(245,158,11,0.12); border: 1px solid #fbbf24; padding: 6px 12px; border-radius: 8px; max-width: 260px;">
+                                <span style="color: #92400e; font-weight: 700; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 4px;">
+                                    <i class="fa-solid fa-screwdriver-wrench"></i> Repair Required
+                                </span>
+                                {% if scaife.repair_details %}
+                                <div style="font-size: 0.78rem; color: #b45309; margin-top: 3px; line-height: 1.3;">
+                                    {{ scaife.repair_details }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% else %}
+                            <span style="color: var(--txt-dark-300); font-size: 0.85rem;">— No Repair</span>
+                            {% endif %}
+                        </td>
+                        <td><strong style="color: var(--clr-success); font-size: 1rem;">₹{{ scaife.cost|floatformat:2 }}</strong></td>
+                        <td><small style="color: var(--txt-dark-500);">{{ scaife.assigned_office.name|default:"General" }}</small></td>
+                        <td style="text-align: right;">
+                            <div style="display: inline-flex; gap: 8px;">
+                                <a href="{% url 'scaife_edit' scaife.pk %}" class="btn btn-outline" style="padding: 6px 12px; font-size: 0.8rem; border-color: var(--clr-primary); color: var(--clr-primary);">
+                                    <i class="fa-solid fa-pen"></i> Edit
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center" style="padding: 40px; color: var(--txt-dark-400);">No historical scaife records found matching your selected criteria.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Table Pagination -->
+    {% if is_paginated %}
+        <div class="pagination">
+            <span class="pagination-info">
+                Showing page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            </span>
+            <div class="pagination-links">
+                {% if page_obj.has_previous %}
+                    <a href="?page=1{% if query %}&q={{ query }}{% endif %}{% if filter_status %}&status={{ filter_status }}{% endif %}{% if filter_office %}&office={{ filter_office }}{% endif %}{% if filter_year %}&year={{ filter_year }}{% endif %}{% if filter_month %}&month={{ filter_month }}{% endif %}{% if date_from %}&from={{ date_from }}{% endif %}{% if date_to %}&to={{ date_to }}{% endif %}" class="page-btn"><i class="fa-solid fa-angles-left"></i></a>
+                    <a href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if filter_status %}&status={{ filter_status }}{% endif %}{% if filter_office %}&office={{ filter_office }}{% endif %}{% if filter_year %}&year={{ filter_year }}{% endif %}{% if filter_month %}&month={{ filter_month }}{% endif %}{% if date_from %}&from={{ date_from }}{% endif %}{% if date_to %}&to={{ date_to }}{% endif %}" class="page-btn"><i class="fa-solid fa-angle-left"></i></a>
+                {% endif %}
+                
+                <span class="page-btn active">{{ page_obj.number }}</span>
+                
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if filter_status %}&status={{ filter_status }}{% endif %}{% if filter_office %}&office={{ filter_office }}{% endif %}{% if filter_year %}&year={{ filter_year }}{% endif %}{% if filter_month %}&month={{ filter_month }}{% endif %}{% if date_from %}&from={{ date_from }}{% endif %}{% if date_to %}&to={{ date_to }}{% endif %}" class="page-btn"><i class="fa-solid fa-angle-right"></i></a>
+                    <a href="?page={{ page_obj.paginator.num_pages }}{% if query %}&q={{ query }}{% endif %}{% if filter_status %}&status={{ filter_status }}{% endif %}{% if filter_office %}&office={{ filter_office }}{% endif %}{% if filter_year %}&year={{ filter_year }}{% endif %}{% if filter_month %}&month={{ filter_month }}{% endif %}{% if date_from %}&from={{ date_from }}{% endif %}{% if date_to %}&to={{ date_to }}{% endif %}" class="page-btn"><i class="fa-solid fa-angles-right"></i></a>
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

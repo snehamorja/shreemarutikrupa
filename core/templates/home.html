@@ -1,0 +1,243 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Home | {{ branding.company_name }}{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container hero-grid">
+        <div class="hero-content">
+            <h1 class="text-gradient">{% if branding %}{{ branding.company_name }}{% else %}Apex Scaife Lapping & Coating{% endif %}</h1>
+            <p>{% if branding %}{{ branding.tagline }}{% else %}Precision engineering and micron-flat surface lapping solutions for diamond cutting scaifes. Prolong wheel life and polish with absolute symmetry.{% endif %}</p>
+            <div class="hero-cta">
+                <a href="{% url 'contact' %}" class="btn btn-primary"><i class="fa-solid fa-paper-plane"></i> Get Started</a>
+                <a href="{% url 'services' %}" class="btn btn-outline"><i class="fa-solid fa-list-check"></i> Our Services</a>
+            </div>
+        </div>
+        <div class="hero-visual">
+            <div class="hero-img-container">
+                <!-- If there is a banner setting from admin, render it, else standard mockup -->
+                {% if branding and branding.banner %}
+                    <img src="{{ branding.banner.url }}" alt="Scaife Processing">
+                {% else %}
+                    <div style="background: linear-gradient(135deg, var(--bg-dark-800), var(--bg-dark-900)); color: var(--clr-primary); height: 350px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px; border-radius: var(--border-radius-lg);">
+                        <i class="fa-solid fa-gem" style="font-size: 5rem; margin-bottom: 20px; animation: bounce 3s infinite;"></i>
+                        <h2 style="color: var(--txt-light-100);">Micron Flatness guaranteed</h2>
+                        <p style="color: var(--txt-light-300); font-size: 0.95rem; margin-top: 10px;">Advanced DLC Coatings & Iron Lapping</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Bar -->
+<section class="stats-section">
+    <div class="container stats-grid">
+        <div class="stat-card">
+            <div class="stat-number">15+</div>
+            <div class="stat-label">Years of Experience</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">02</div>
+            <div class="stat-label">Active Offices</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">25k+</div>
+            <div class="stat-label">Scaifes Processed</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">500+</div>
+            <div class="stat-label">Happy Clients</div>
+        </div>
+    </div>
+</section>
+
+<!-- Why Choose Us -->
+<section class="section-padding">
+    <div class="container">
+        <div class="section-header text-center">
+            <h2>Why Choose Us</h2>
+            <p>Leading diamond manufacturers in Surat and Mumbai trust us for executing perfect scaife restoration. Here is why we lead the industry.</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card">
+                <i class="fa-solid fa-gauge-high feature-icon"></i>
+                <h3>Sub-Micron Flatness</h3>
+                <p>We execute standard, precision, and ultra-precision lapping using advanced grinding beds to restore cast iron plates to sub-micron flatness.</p>
+            </div>
+            <div class="feature-card">
+                <i class="fa-solid fa-shield-halved feature-icon"></i>
+                <h3>Advanced DLC Coatings</h3>
+                <p>Our proprietary Diamond-Like Carbon (DLC) coating ensures maximum adhesion of diamond powder, minimizing wear and wheel change frequencies.</p>
+            </div>
+            <div class="feature-card">
+                <i class="fa-solid fa-clock-rotate-left feature-icon"></i>
+                <h3>Fast Turnaround</h3>
+                <p>With processing hubs located in major industrial clusters (Surat GIDC & Mumbai BKC), we ensure scaifes are returned ready in under 48 hours.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Brief Services Overview -->
+<section class="section-padding" style="background-color: var(--bg-light-200);">
+    <div class="container">
+        <div class="section-header text-center">
+            <h2>Our Core Services</h2>
+            <p>High-quality craftsmanship designed to keep diamond cutting operations running at maximum efficiency.</p>
+        </div>
+        
+        <div class="services-grid">
+            <!-- Service 1 -->
+            <div class="service-card">
+                <div class="service-img-wrapper">
+                    <div class="service-img-placeholder">
+                        <i class="fa-solid fa-compact-disc" style="font-size: 3.5rem;"></i>
+                    </div>
+                </div>
+                <div class="service-content">
+                    <h3>Diamond Scaife Lapping</h3>
+                    <p>Flatness correction of iron plates to remove grooves and scores accumulated during diamond cutting.</p>
+                    <ul class="service-benefits">
+                        <li>Eliminates polishing vibrations</li>
+                        <li>Ensures symmetric facet angles</li>
+                        <li>Micron-level flattening</li>
+                    </ul>
+                    <a href="{% url 'services' %}" class="btn btn-outline" style="width: 100%;">Learn More</a>
+                </div>
+            </div>
+
+            <!-- Service 2 -->
+            <div class="service-card">
+                <div class="service-img-wrapper">
+                    <div class="service-img-placeholder">
+                        <i class="fa-solid fa-layer-group" style="font-size: 3.5rem; color: var(--clr-secondary);"></i>
+                    </div>
+                </div>
+                <div class="service-content">
+                    <h3>Diamond Scaife Coating</h3>
+                    <p>Applying uniform microscopic coating layers to provide optimal hold for fine abrasive powder.</p>
+                    <ul class="service-benefits">
+                        <li>Reduces diamond dust consumption</li>
+                        <li>Prevents plate burning</li>
+                        <li>Choice of Premium & DLC coatings</li>
+                    </ul>
+                    <a href="{% url 'services' %}" class="btn btn-outline" style="width: 100%;">Learn More</a>
+                </div>
+            </div>
+
+            <!-- Service 3 -->
+            <div class="service-card">
+                <div class="service-img-wrapper">
+                    <div class="service-img-placeholder">
+                        <i class="fa-solid fa-screwdriver-wrench" style="font-size: 3.5rem; color: var(--clr-success);"></i>
+                    </div>
+                </div>
+                <div class="service-content">
+                    <h3>Scaife Maintenance & QC</h3>
+                    <p>Routine inspections, runout diagnostics, and balance adjustments to prevent damage to expensive diamonds.</p>
+                    <ul class="service-benefits">
+                        <li>Dynamic balancing tests</li>
+                        <li>Spindle alignment audits</li>
+                        <li>Quality clearance report</li>
+                    </ul>
+                    <a href="{% url 'services' %}" class="btn btn-outline" style="width: 100%;">Learn More</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Process of Lapping & Coating -->
+<section class="section-padding">
+    <div class="container">
+        <div class="section-header text-center">
+            <h2>Process of Lapping & Coating</h2>
+            <p>Our systematic processing sequence guarantees that every scaife meets strict industrial polish tolerances.</p>
+        </div>
+        
+        <div class="process-timeline">
+            <div class="process-step">
+                <div class="step-number">01</div>
+                <div class="step-content">
+                    <h3>Inspection & Scoring</h3>
+                    <p>Each scaife is registered on our portal with its unique serial number. We run surface profile scoring tests to measure the degree of warp, groove depth, and runout.</p>
+                </div>
+            </div>
+
+            <div class="process-step">
+                <div class="step-number">02</div>
+                <div class="step-content">
+                    <h3>Surface Lapping</h3>
+                    <p>The scaife is mounted on a CNC lapping table. We grind the surface using micro-abrasive slurries until the face is perfectly flat, verified via optical flats.</p>
+                </div>
+            </div>
+
+            <div class="process-step">
+                <div class="step-number">03</div>
+                <div class="step-content">
+                    <h3>Chemical Coating</h3>
+                    <p>After polishing, plates are thoroughly degreased. We apply a thin, uniform chemical micro-layer (Standard, Premium, or DLC) to create keyways for diamond polishing grains.</p>
+                </div>
+            </div>
+
+            <div class="process-step">
+                <div class="step-number">04</div>
+                <div class="step-content">
+                    <h3>Quality Testing & Delivery</h3>
+                    <p>The scaife goes through spin balancing and thickness checks. Once approved by the Quality Control team, it is packaged safely and dispatched to the client.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials Section -->
+<section class="section-padding" style="background-color: var(--bg-light-200);">
+    <div class="container">
+        <div class="section-header text-center">
+            <h2>Client Testimonials</h2>
+            <p>Read opinions from production managers who utilize our processed scaifes daily.</p>
+        </div>
+        
+        <div class="testimonials-grid">
+            {% for testimonial in testimonials %}
+                <div class="testimonial-card">
+                    <div>
+                        <div class="testimonial-rating">
+                            {% for i in "12345"|slice:testimonial.rating %}
+                                <i class="fa-solid fa-star"></i>
+                            {% endfor %}
+                        </div>
+                        <p class="testimonial-text">"{{ testimonial.review_text }}"</p>
+                    </div>
+                    <div class="testimonial-author">
+                        <div class="author-info">
+                            <h4>{{ testimonial.client_name }}</h4>
+                            <span>{{ testimonial.company }}</span>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <p class="text-center" style="grid-column: 1 / -1;">No testimonials added yet.</p>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action -->
+<section class="section-padding" style="background: linear-gradient(135deg, var(--bg-dark-900) 0%, var(--bg-dark-800) 100%); color: white;">
+    <div class="container text-center" style="max-width: 700px;">
+        <h2 style="color: white; font-size: 2.5rem; margin-bottom: 20px;">Ready to Optimize Your Polishing Line?</h2>
+        <p style="color: var(--txt-light-300); font-size: 1.1rem; margin-bottom: 40px;">Get in touch with our team in Surat or Mumbai. Register scaifes through our secure customer portals for instant processing tracking.</p>
+        <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+            <a href="{% url 'contact' %}" class="btn btn-secondary"><i class="fa-solid fa-phone-volume"></i> Contact Us Now</a>
+            {% if not user.is_authenticated %}
+                <a href="{% url 'login' %}" class="btn btn-outline" style="border-color: white; color: white;"><i class="fa-solid fa-right-to-bracket"></i> Login to Portal</a>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}

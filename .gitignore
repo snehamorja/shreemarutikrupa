@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+db.sqlite3-journal
+
+# Environments
+.env
+venv/
+ENV/
+env/
+.venv/
+
+# Backup & local test files
+deploy_package.zip
+backups/
+
+# OS files
+.DS_Store
+Thumbs.db

@@ -1,0 +1,281 @@
+{% extends 'dashboard/dashboard_base.html' %}
+
+{% block db_page_title %}{% if office %}Edit Office — {{ office.name }}{% else %}Add Processing Office{% endif %}{% endblock %}
+
+{% block db_content %}
+
+{% if reset_creds %}
+<!-- ── New Password Card ── -->
+<div style="background: linear-gradient(135deg, #14532d, #166534); color: white; padding: 24px 32px; border-radius: var(--border-radius-md); margin-bottom: 28px; position: relative; overflow: hidden;">
+    <div style="position: absolute; top: -20px; right: -20px; font-size: 7rem; opacity: 0.07;"><i class="fa-solid fa-key"></i></div>
+    <h3 style="color: white; margin: 0 0 8px;"><i class="fa-solid fa-rotate"></i> Password Reset Successfully!</h3>
+    <p style="color: rgba(255,255,255,0.7); font-size: 0.85rem; margin-bottom: 18px;">Save these new credentials — the previous password is now invalid.</p>
+    <div style="background: rgba(0,0,0,0.3); border-radius: 8px; padding: 16px 24px; font-family: 'Courier New', monospace; line-height: 2.2; font-size: 0.95rem;">
+        <div><span style="color: rgba(255,255,255,0.5); width: 140px; display: inline-block;">👤 Username</span><strong style="color: #86efac; font-size: 1.05rem;">{{ reset_creds.username }}</strong></div>
+        <div><span style="color: rgba(255,255,255,0.5); width: 140px; display: inline-block;">🔒 New Password</span><strong style="color: #fde68a; font-size: 1.1rem;">{{ reset_creds.password }}</strong></div>
+        <div><span style="color: rgba(255,255,255,0.5); width: 140px; display: inline-block;">📧 Emailed to</span><strong>{{ reset_creds.email }}</strong></div>
+    </div>
+    <p style="margin-top: 12px; font-size: 0.8rem; color: rgba(255,255,255,0.5);">
+        <i class="fa-solid fa-circle-info"></i> New password has also been emailed to <strong>{{ reset_creds.email }}</strong>.
+    </p>
+</div>
+{% endif %}
+
+<div class="db-card-form">
+    <div style="margin-bottom: 28px;">
+        <h3>{% if office %}Edit Office Details{% else %}Add Processing Office{% endif %}</h3>
+        <p style="color: var(--txt-dark-400);">Enter regional service center properties. Create or auto-generate manager login credentials.</p>
+    </div>
+
+    <!-- ── Manager Login Credentials (Edit Mode Only) ── -->
+    {% if office and manager_user %}
+    <div style="background: linear-gradient(135deg, #0c4a6e, #0369a1); color: white; padding: 22px 28px; border-radius: var(--border-radius-md); margin-bottom: 32px; position: relative; overflow: hidden;">
+        <div style="position: absolute; top: -15px; right: -15px; font-size: 6rem; opacity: 0.08;"><i class="fa-solid fa-user-shield"></i></div>
+
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px;">
+            <div>
+                <h4 style="color: white; margin: 0 0 6px; font-size: 1rem;"><i class="fa-solid fa-user-tie"></i> Manager Login Credentials</h4>
+                <p style="color: rgba(255,255,255,0.6); font-size: 0.82rem; margin: 0 0 16px;">These credentials belong to this office manager account.</p>
+
+                <div style="background: rgba(0,0,0,0.3); border-radius: 8px; padding: 14px 20px; font-family: 'Courier New', monospace; line-height: 2.2; font-size: 0.92rem;">
+                    <div><span style="color: rgba(255,255,255,0.5); width: 130px; display: inline-block;">👤 Username</span><strong style="color: #67e8f9; font-size: 1.05rem;">{{ manager_user.username }}</strong></div>
+                    <div>
+                        <span style="color: rgba(255,255,255,0.5); width: 130px; display: inline-block;">🔒 Password</span>
+                        <strong style="color: #fde68a; font-size: 1.05rem; font-family: monospace;" id="main_mgr_pass" data-realpass="{% if reset_creds %}{{ reset_creds.password }}{% else %}{{ latest_password|default:'' }}{% endif %}">••••••••</strong>
+                        <button type="button" onclick="revealMainMgrPass()" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: white; border-radius: 6px; padding: 2px 10px; font-size: 0.75rem; cursor: pointer; margin-left: 8px;">
+                            <i class="fa-solid fa-key" id="main_mgr_eye"></i> Unlock (4-Digit PIN)
+                        </button>
+                    </div>
+                    <div><span style="color: rgba(255,255,255,0.5); width: 130px; display: inline-block;">📧 Email</span><strong>{{ manager_user.email }}</strong></div>
+                    <div><span style="color: rgba(255,255,255,0.5); width: 130px; display: inline-block;">🏢 Office</span><strong>{{ office.name }}</strong></div>
+                </div>
+            </div>
+
+            <!-- Custom Password Change & WhatsApp Action -->
+            <div style="display: flex; flex-direction: column; gap: 12px; justify-content: center; min-width: 260px;">
+                <form method="POST" style="background: rgba(0,0,0,0.2); padding: 12px 16px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.15);">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="reset_password">
+                    <label style="font-size: 0.78rem; color: rgba(255,255,255,0.7); display: block; margin-bottom: 6px;">
+                        <i class="fa-solid fa-pen-to-square"></i> Change Password to Your Choice:
+                    </label>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="text" name="custom_new_password" class="form-control" placeholder="Type new password" style="padding: 6px 10px; font-size: 0.85rem; background: white; color: #0f172a; font-weight: 700; border-radius: 6px;" required>
+                        <button type="submit" class="btn btn-outline" style="border-color: #fde68a; color: #fde68a; padding: 6px 14px; white-space: nowrap; font-size: 0.82rem;" onclick="return confirm('Update manager password to this choice?');">
+                            <i class="fa-solid fa-save"></i> Save
+                        </button>
+                    </div>
+                </form>
+
+                <a id="wp_share_btn" href="https://wa.me/{% if office.manager_whatsapp %}{{ office.manager_whatsapp|slugify }}{% endif %}?text=🏢%20*{{ office.name }}%20Manager%20Access*%0A👤%20Username:%20{{ manager_user.username }}%0A🔑%20Login%20URL:%20http://127.0.0.1:8000/login/" target="_blank" class="btn" style="background: #25d366; color: white; border: none; padding: 10px 20px; text-align: center; font-weight: 700; border-radius: 8px; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    <i class="fa-brands fa-whatsapp" style="font-size: 1.2rem;"></i> Send Credentials via WhatsApp
+                </a>
+            </div>
+        </div>
+    </div>
+    {% elif office and not manager_user %}
+    <div style="background: rgba(234,179,8,0.1); border: 1px solid #fbbf24; color: #92400e; padding: 16px 20px; border-radius: var(--border-radius-sm); margin-bottom: 28px;">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <strong>No manager account found for this office.</strong>
+        Please manually create a Manager user from <a href="{% url 'user_create' %}" style="color: #92400e; text-decoration: underline;">User Management</a> and assign them to this office.
+    </div>
+    {% endif %}
+
+    <!-- ── Office Details Form ── -->
+    <form method="POST">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="save">
+
+        {% if form.errors %}
+            <div style="background-color: rgba(239, 68, 68, 0.1); border-left: 4px solid var(--clr-danger); padding: 16px; border-radius: var(--border-radius-sm); margin-bottom: 24px; color: var(--clr-danger);">
+                <p><strong>Errors occurred on form inputs:</strong></p>
+                <ul style="margin-left: 20px; margin-top: 8px;">
+                    {% for field in form %}
+                        {% for error in field.errors %}
+                            <li>{{ field.label }}: {{ error }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        <div class="form-group">
+            <label for="id_name">Office Facility Name</label>
+            <input type="text" name="name" id="id_name" value="{{ form.name.value|default:'' }}" class="form-control" placeholder="E.g. Surat Head Office" required>
+        </div>
+
+        <div class="form-group">
+            <label for="id_location">Full Location Address</label>
+            <input type="text" name="location" id="id_location" value="{{ form.location.value|default:'' }}" class="form-control" placeholder="E.g. Plot No. 12, GIDC Ichhapore, Surat" required>
+        </div>
+
+        <div class="form-grid-2">
+            <div class="form-group">
+                <label for="id_phone">Contact Telephone</label>
+                <input type="text" name="phone" id="id_phone" value="{{ form.phone.value|default:'' }}" class="form-control" placeholder="E.g. +91 261 2898980" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="id_email">Office Email Address</label>
+                <input type="email" name="email" id="id_email" value="{{ form.email.value|default:'' }}" class="form-control" placeholder="E.g. surat@scaifetech.com" required>
+            </div>
+        </div>
+
+        {% if not office %}
+        <!-- ── Manager Credentials Creation Section ── -->
+        <h4 style="color: var(--clr-primary); border-bottom: 1px solid var(--bg-light-300); padding-bottom: 8px; margin-top: 36px; margin-bottom: 20px;">
+            <i class="fa-solid fa-user-shield"></i> Office Manager Credentials (Specify Custom Login)
+        </h4>
+
+        <div class="form-grid-2">
+            <div class="form-group">
+                <label for="id_manager_username"><i class="fa-solid fa-user"></i> Manager Username</label>
+                <input type="text" name="manager_username" id="id_manager_username" value="{{ form.manager_username.value|default:'' }}" class="form-control" placeholder="E.g. surat_manager (leave blank for auto-generate)">
+                <small style="color: var(--txt-dark-400); font-size: 0.78rem;">Username used by office manager to log in</small>
+            </div>
+
+            <div class="form-group">
+                <label for="id_manager_password"><i class="fa-solid fa-lock"></i> Manager Password</label>
+                <div style="position: relative;">
+                    <input type="password" name="manager_password" id="id_manager_password" class="form-control" placeholder="Enter custom password (leave blank for auto-generate)" style="padding-right: 44px;">
+                    <button type="button" onclick="togglePass('id_manager_password', 'mgrEye')" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--txt-dark-400); cursor: pointer;">
+                        <i class="fa-solid fa-eye" id="mgrEye"></i>
+                    </button>
+                </div>
+                <small style="color: var(--txt-dark-400); font-size: 0.78rem;">Password for office manager login</small>
+            </div>
+        </div>
+        {% endif %}
+
+        <div style="display: flex; gap: 16px; margin-top: 40px; justify-content: flex-end;">
+            <a href="{% url 'office_list' %}" class="btn btn-outline" style="border-color: var(--bg-dark-700); color: var(--bg-dark-700);">Cancel</a>
+            <button type="submit" class="btn btn-primary">
+                <i class="fa-solid fa-save"></i> Save Office
+            </button>
+        </div>
+    </form>
+</div>
+
+{% if office and user.profile.role == 'admin' %}
+<!-- ── Password & Credential Change History Panel ── -->
+<div class="db-panel" style="margin-top: 32px;">
+    <div class="db-panel-header" style="margin-bottom: 20px;">
+        <h3><i class="fa-solid fa-clock-rotate-left" style="color: var(--clr-primary);"></i> Manager Password & Credential History</h3>
+        <span style="font-size: 0.85rem; color: var(--txt-dark-400);">Complete security audit log of password creations, resets, and user updates for {{ office.name }}</span>
+    </div>
+    
+    <div class="table-responsive">
+        <table class="db-table">
+            <thead>
+                <tr>
+                    <th>Date & Time</th>
+                    <th>Username</th>
+                    <th>Password Logged</th>
+                    <th>Event / Action</th>
+                    <th>Changed By</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in credential_history %}
+                <tr>
+                    <td><small style="color: var(--txt-dark-600); font-weight: 600;"><i class="fa-regular fa-clock"></i> {{ item.timestamp|date:"d M Y, h:i A" }}</small></td>
+                    <td><strong style="color: var(--clr-primary);"><i class="fa-solid fa-user"></i> {{ item.username }}</strong></td>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <code id="hist_pass_{{ item.pk }}" data-realpass="{{ item.password_text|default:'' }}" style="background: rgba(16,185,129,0.1); color: #059669; padding: 4px 10px; border-radius: 6px; font-weight: 700; font-size: 0.9rem;">
+                                ••••••••
+                            </code>
+                            {% if item.password_text %}
+                            <button type="button" onclick="revealHistoryPass({{ item.pk }})" class="btn btn-outline" style="padding: 3px 8px; font-size: 0.75rem;" title="Unlock & View Password">
+                                <i class="fa-solid fa-eye" id="hist_eye_{{ item.pk }}"></i> Unlock
+                            </button>
+                            <button type="button" onclick="copyHistoryPass({{ item.pk }})" class="btn btn-outline" style="padding: 3px 8px; font-size: 0.75rem;" title="Copy Password">
+                                <i class="fa-solid fa-copy"></i>
+                            </button>
+                            {% endif %}
+                        </div>
+                    </td>
+                    <td>
+                        <span class="badge badge-{% if 'Created' in item.change_type %}ready{% elif 'Reset' in item.change_type %}lapping{% else %}coating{% endif %}">
+                            {{ item.change_type }}
+                        </span>
+                    </td>
+                    <td><small style="color: var(--txt-dark-500);"><i class="fa-solid fa-user-gear"></i> {{ item.changed_by.username|default:"System" }}</small></td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center" style="padding: 30px; color: var(--txt-dark-400);">
+                        No password change history recorded yet for this office. History will appear whenever passwords are created, reset by admin, or updated by the manager.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+
+<script>
+function togglePass(inputId, eyeId) {
+    const input = document.getElementById(inputId);
+    const eye = document.getElementById(eyeId);
+    if (input.type === 'password') {
+        input.type = 'text';
+        eye.classList.remove('fa-eye');
+        eye.classList.add('fa-eye-slash');
+    } else {
+        input.type = 'password';
+        eye.classList.remove('fa-eye-slash');
+        eye.classList.add('fa-eye');
+    }
+}
+
+function revealMainMgrPass() {
+    requestSecurityPinAccess(() => {
+        const elem = document.getElementById('main_mgr_pass');
+        const realPass = elem.getAttribute('data-realpass');
+        const wpBtn = document.getElementById('wp_share_btn');
+        if (elem.innerText === '••••••••') {
+            elem.innerText = realPass || '[Custom Password Set]';
+            if (wpBtn && realPass) {
+                const uname = '{{ manager_user.username }}';
+                const officeName = '{{ office.name }}';
+                const phone = '{{ office.manager_whatsapp|default:"" }}'.replace('+', '').replace(/\s+/g, '');
+                const text = `🏢 *${officeName} Manager Access Credentials*\n👤 Username: ${uname}\n🔒 Password: ${realPass}\n🔑 Login URL: http://127.0.0.1:8000/login/`;
+                const encoded = encodeURIComponent(text);
+                wpBtn.href = phone ? `https://wa.me/${phone}?text=${encoded}` : `https://wa.me/?text=${encoded}`;
+            }
+        } else {
+            elem.innerText = '••••••••';
+        }
+    });
+}
+
+function revealHistoryPass(pk) {
+    requestSecurityPinAccess(() => {
+        const codeElem = document.getElementById('hist_pass_' + pk);
+        const realPass = codeElem.getAttribute('data-realpass');
+        if (codeElem.innerText === '••••••••') {
+            codeElem.innerText = realPass || '[Custom Password Set]';
+            document.getElementById('hist_eye_' + pk).classList.replace('fa-eye', 'fa-eye-slash');
+        } else {
+            codeElem.innerText = '••••••••';
+            document.getElementById('hist_eye_' + pk).classList.replace('fa-eye-slash', 'fa-eye');
+        }
+    });
+}
+
+function copyHistoryPass(pk) {
+    requestSecurityPinAccess(() => {
+        const codeElem = document.getElementById('hist_pass_' + pk);
+        const realPass = codeElem.getAttribute('data-realpass');
+        if (realPass) {
+            navigator.clipboard.writeText(realPass).then(() => {
+                alert('✅ Security PIN Verified! Password copied: ' + realPass);
+            });
+        }
+    });
+}
+</script>
+{% endblock %}

@@ -1,0 +1,109 @@
+{% extends 'dashboard/dashboard_base.html' %}
+
+{% block db_page_title %}Office Management{% endblock %}
+
+{% block db_content %}
+<div class="db-panel" style="margin-bottom: 24px;">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h3>Processing Facilities</h3>
+        {% if user.profile.role == 'admin' %}
+            <a href="{% url 'office_create' %}" class="btn btn-primary"><i class="fa-solid fa-circle-plus"></i> Add Office</a>
+        {% endif %}
+    </div>
+</div>
+
+<!-- ── Credentials Card (shown after creating a new office) ── -->
+{% if new_office_creds %}
+<div style="background: linear-gradient(135deg, #0c4a6e, #0369a1); color: white; padding: 28px 32px; border-radius: var(--border-radius-md); margin-bottom: 32px; position: relative; overflow: hidden;">
+    <div style="position: absolute; top: -20px; right: -20px; font-size: 8rem; opacity: 0.07; pointer-events: none;"><i class="fa-solid fa-key"></i></div>
+
+    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
+        <div style="background: rgba(255,255,255,0.15); border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
+            <i class="fa-solid fa-user-shield"></i>
+        </div>
+        <div>
+            <h3 style="color: white; margin: 0; font-size: 1.2rem;">New Office Manager Account Created!</h3>
+            <p style="color: rgba(255,255,255,0.7); font-size: 0.85rem; margin: 0;">Save these credentials — you can copy or share them via WhatsApp below.</p>
+        </div>
+    </div>
+
+    <div style="background: rgba(0,0,0,0.25); border-radius: var(--border-radius-sm); padding: 20px 24px; font-family: 'Courier New', monospace; font-size: 0.95rem; line-height: 2.2;">
+        <div><span style="color: rgba(255,255,255,0.5); width: 130px; display: inline-block;">🏢 Office</span><strong>{{ new_office_creds.office_name }}</strong></div>
+        <div><span style="color: rgba(255,255,255,0.5); width: 130px; display: inline-block;">👤 Username</span><strong style="color: #67e8f9; font-size: 1.1rem;" id="cred_user">{{ new_office_creds.username }}</strong></div>
+        <div><span style="color: rgba(255,255,255,0.5); width: 130px; display: inline-block;">🔒 Password</span><strong style="color: #fde68a; font-size: 1.1rem;" id="cred_pass">{{ new_office_creds.password }}</strong></div>
+        <div><span style="color: rgba(255,255,255,0.5); width: 130px; display: inline-block;">📧 Sent to</span><strong>{{ new_office_creds.email }}</strong></div>
+    </div>
+
+    <div style="margin-top: 16px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
+        <button type="button" class="btn btn-outline" style="border-color: #67e8f9; color: #67e8f9; padding: 8px 18px; font-size: 0.85rem;" onclick="copyCredentials('{{ new_office_creds.username }}', '{{ new_office_creds.password }}', '{{ new_office_creds.office_name }}')">
+            <i class="fa-solid fa-copy"></i> Copy Credentials
+        </button>
+        <a href="https://wa.me/?text=Hello%20{{ new_office_creds.office_name }}%20Team,%20Here%20are%20your%20Portal%20Login%20Credentials:%20Username:%20{{ new_office_creds.username }}%20|%20Password:%20{{ new_office_creds.password }}%20|%20Login:%20http://127.0.0.1:8000/login/" target="_blank" class="btn btn-outline" style="border-color: #22c55e; color: #4ade80; padding: 8px 18px; font-size: 0.85rem;">
+            <i class="fa-brands fa-whatsapp"></i> Share via WhatsApp
+        </a>
+    </div>
+</div>
+{% endif %}
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px;">
+    {% for office in offices %}
+        <div class="db-panel" style="display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+                    <div class="widget-icon blue" style="width: 48px; height: 48px; font-size: 1.25rem;"><i class="fa-solid fa-building"></i></div>
+                    <div>
+                        <h3 style="font-size: 1.3rem; margin: 0;">{{ office.name }}</h3>
+                        {% if office.manager_username %}
+                        <span style="font-size: 0.78rem; color: var(--clr-primary); background: rgba(14,165,233,0.08); padding: 2px 8px; border-radius: 4px; margin-top: 4px; display: inline-block;">
+                            <i class="fa-solid fa-user-tie"></i> {{ office.manager_username }}
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div style="font-size: 0.95rem; color: var(--txt-dark-700); display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px;">
+                    <p><i class="fa-solid fa-location-dot" style="color: var(--clr-primary); width: 20px;"></i> {{ office.location }}</p>
+                    <p><i class="fa-solid fa-phone" style="color: var(--clr-primary); width: 20px;"></i> {{ office.phone }}</p>
+                    <p><i class="fa-solid fa-envelope" style="color: var(--clr-primary); width: 20px;"></i> {{ office.email }}</p>
+                </div>
+
+                {% if office.manager_username %}
+                <div style="background: rgba(14,165,233,0.06); border: 1px dashed rgba(14,165,233,0.3); border-radius: 8px; padding: 10px 14px; font-size: 0.82rem; color: var(--txt-dark-600); margin-bottom: 8px;">
+                    <i class="fa-solid fa-circle-info" style="color: var(--clr-primary);"></i>
+                    Login username: <strong style="color: var(--clr-primary);">{{ office.manager_username }}</strong> &nbsp;|&nbsp; 
+                    <a href="{% url 'office_edit' office.pk %}" style="color: var(--clr-primary);">View / Reset Password →</a>
+                </div>
+                {% endif %}
+            </div>
+
+            {% if user.profile.role == 'admin' %}
+                <div style="display: flex; gap: 12px; border-top: 1px solid var(--bg-light-300); padding-top: 16px; margin-top: 16px;">
+                    <a href="{% url 'office_edit' office.pk %}" class="btn btn-outline" style="padding: 8px 16px; font-size: 0.85rem; flex-grow: 1;">
+                        <i class="fa-solid fa-pen"></i> Edit / Credentials
+                    </a>
+                    <a href="{% url 'office_delete' office.pk %}" class="btn btn-outline" style="padding: 8px 16px; font-size: 0.85rem; border-color: var(--clr-danger); color: var(--clr-danger);" onclick="return confirm('Are you sure you want to delete this office? All assigned scaifes will be affected.');">
+                        <i class="fa-solid fa-trash"></i> Delete
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    {% empty %}
+        <div class="db-panel" style="grid-column: 1 / -1; text-align: center; padding: 40px;">
+            No processing offices registered yet.
+        </div>
+    {% endfor %}
+</div>
+
+<script>
+function copyCredentials(uname, pass, office) {
+    requestSecurityPinAccess(() => {
+        const text = `🏢 Office: ${office}\n👤 Username: ${uname}\n🔒 Password: ${pass}\n🔑 Login URL: http://127.0.0.1:8000/login/`;
+        navigator.clipboard.writeText(text).then(() => {
+            alert('✅ Security PIN Verified! Credentials copied to clipboard.');
+        }).catch(err => {
+            alert('Username: ' + uname + '\nPassword: ' + pass);
+        });
+    });
+}
+</script>
+{% endblock %}

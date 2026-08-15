@@ -1,0 +1,147 @@
+{% extends 'dashboard/dashboard_base.html' %}
+
+{% block db_page_title %}Worker Payroll & Finance Management{% endblock %}
+
+{% block db_content %}
+<div class="db-panel" style="margin-bottom: 24px;">
+    <!-- Top actions bar -->
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+        <div>
+            <h3 style="font-size: 1.2rem;">
+                <i class="fa-solid fa-user-group" style="color: var(--clr-primary);"></i> 
+                Worker Directory & Payroll Ledger
+            </h3>
+            <p style="color: var(--txt-dark-400); font-size: 0.85rem; margin-top: 4px;">
+                Manage individual worker profiles, track salary credits, advances, cash taken, leaves, bonuses, deductions, expenses, and pending balances.
+            </p>
+        </div>
+        <div>
+            {% if user.profile.role == 'admin' %}
+                <a href="{% url 'worker_create' %}" class="btn btn-primary" style="padding: 10px 20px;">
+                    <i class="fa-solid fa-user-plus"></i> Add Worker Profile
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Summary KPI Widgets -->
+<div class="widgets-grid" style="margin-bottom: 24px;">
+    <div class="widget-card">
+        <div class="widget-details">
+            <span>Active Workers</span>
+            <div class="widget-value">{{ total_workers_count }}</div>
+        </div>
+        <div class="widget-icon blue"><i class="fa-solid fa-users"></i></div>
+    </div>
+    <div class="widget-card">
+        <div class="widget-details">
+            <span>Total Base Salary</span>
+            <div class="widget-value" style="font-size: 1.4rem;">₹{{ grand_total_base_salary|floatformat:0 }}</div>
+        </div>
+        <div class="widget-icon green"><i class="fa-solid fa-money-bill-wave"></i></div>
+    </div>
+    <div class="widget-card">
+        <div class="widget-details">
+            <span>Total Advances Given</span>
+            <div class="widget-value" style="font-size: 1.4rem;">₹{{ grand_total_advances|floatformat:0 }}</div>
+        </div>
+        <div class="widget-icon amber"><i class="fa-solid fa-hand-holding-dollar"></i></div>
+    </div>
+    <div class="widget-card">
+        <div class="widget-details">
+            <span>Total Payments Disbursed</span>
+            <div class="widget-value" style="font-size: 1.4rem;">₹{{ grand_total_payments|floatformat:0 }}</div>
+        </div>
+        <div class="widget-icon blue"><i class="fa-solid fa-credit-card"></i></div>
+    </div>
+    <div class="widget-card">
+        <div class="widget-details">
+            <span>Total Pending Balance</span>
+            <div class="widget-value" style="font-size: 1.4rem; color: {% if grand_total_pending > 0 %}var(--clr-danger){% else %}var(--clr-success){% endif %};">
+                ₹{{ grand_total_pending|floatformat:0 }}
+            </div>
+        </div>
+        <div class="widget-icon red"><i class="fa-solid fa-hourglass-half"></i></div>
+    </div>
+</div>
+
+<!-- Search & Office Filter Bar -->
+<form method="GET" action="{% url 'worker_list' %}" class="filter-bar" style="margin-bottom: 24px;">
+    <div class="search-input">
+        <input type="text" name="q" value="{{ query }}" placeholder="Search worker by name or phone...">
+    </div>
+
+    {% if user.profile.role == 'admin' %}
+    <select name="office" class="filter-select" onchange="this.form.submit()">
+        <option value="">All Offices</option>
+        {% for office in offices %}
+            <option value="{{ office.id }}" {% if filter_office == office.id|stringformat:"s" %}selected{% endif %}>{{ office.name }}</option>
+        {% endfor %}
+    </select>
+    {% endif %}
+
+    <button type="submit" class="btn btn-dark" style="padding: 10px 20px;"><i class="fa-solid fa-filter"></i> Apply</button>
+    {% if query or filter_office %}
+        <a href="{% url 'worker_list' %}" class="btn btn-outline" style="padding: 10px 20px;">Clear</a>
+    {% endif %}
+</form>
+
+<!-- Worker Directory Table -->
+<div class="db-panel">
+    <div class="table-responsive">
+        <table class="db-table">
+            <thead>
+                <tr>
+                    <th>Worker Name</th>
+                    <th>Office Branch</th>
+                    <th>Contact Phone</th>
+                    <th>Base Salary (₹)</th>
+                    <th>Total Advances (₹)</th>
+                    <th>Total Paid (₹)</th>
+                    <th>Leaves Taken</th>
+                    <th>Pending Payout (₹)</th>
+                    <th style="text-align: right;">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for worker in workers %}
+                <tr>
+                    <td>
+                        <strong style="color: var(--clr-primary); font-size: 1rem;">
+                            <i class="fa-solid fa-circle-user" style="margin-right: 6px;"></i> {{ worker.name }}
+                        </strong>
+                    </td>
+                    <td>{{ worker.office.name|default:"Unassigned" }}</td>
+                    <td>{{ worker.phone|default:"-" }}</td>
+                    <td><strong>₹{{ worker.base_salary|floatformat:0 }}</strong></td>
+                    <td><span style="color: var(--clr-warning);">₹{{ worker.total_advance|floatformat:0 }}</span></td>
+                    <td><span style="color: var(--clr-success);">₹{{ worker.total_payments|floatformat:0 }}</span></td>
+                    <td>
+                        <span class="badge badge-received">
+                            <i class="fa-solid fa-calendar-minus"></i> {{ worker.total_leaves }} days
+                        </span>
+                    </td>
+                    <td>
+                        <strong style="font-size: 1rem; color: {% if worker.pending_balance > 0 %}var(--clr-danger){% else %}var(--clr-success){% endif %};">
+                            ₹{{ worker.pending_balance|floatformat:0 }}
+                        </strong>
+                    </td>
+                    <td style="text-align: right;">
+                        <a href="{% url 'worker_detail' worker.pk %}" class="btn btn-primary" style="padding: 6px 14px; font-size: 0.82rem;">
+                            <i class="fa-solid fa-folder-open"></i> Open Ledger & Finances
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="9" class="text-center" style="padding: 40px; color: var(--txt-dark-400);">
+                        No worker profiles registered yet.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

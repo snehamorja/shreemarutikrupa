@@ -1,0 +1,282 @@
+{% extends 'dashboard/dashboard_base.html' %}
+
+{% block db_page_title %}Worker Financial Ledger — {{ worker.name }}{% endblock %}
+
+{% block db_content %}
+
+<!-- Worker Profile Header Banner -->
+<div style="background: linear-gradient(135deg, #1e293b, #0f172a); color: white; padding: 24px 32px; border-radius: var(--border-radius-md); margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
+    <div style="display: flex; align-items: center; gap: 16px;">
+        <div style="background: rgba(255,255,255,0.1); width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; color: #38bdf8;">
+            <i class="fa-solid fa-user-gear"></i>
+        </div>
+        <div>
+            <h2 style="color: white; margin: 0; font-size: 1.6rem;">{{ worker.name }}</h2>
+            <p style="color: rgba(255,255,255,0.7); font-size: 0.88rem; margin-top: 4px;">
+                <i class="fa-solid fa-building"></i> {{ worker.office.name|default:"Unassigned Office" }} &nbsp;|&nbsp;
+                <i class="fa-solid fa-phone"></i> {{ worker.phone|default:"No phone" }} &nbsp;|&nbsp;
+                <i class="fa-solid fa-calendar-check"></i> Joined: {{ worker.joining_date|date:"d M Y"|default:"N/A" }}
+            </p>
+        </div>
+    </div>
+    <div style="display: flex; gap: 12px; align-items: center;">
+        {% if user.profile.role == 'admin' %}
+            <a href="{% url 'worker_edit' worker.pk %}" class="btn btn-outline" style="border-color: rgba(255,255,255,0.4); color: white;">
+                <i class="fa-solid fa-pen"></i> Edit Profile
+            </a>
+        {% endif %}
+        <a href="{% url 'worker_list' %}" class="btn btn-outline" style="border-color: rgba(255,255,255,0.4); color: white;">
+            ← Back to Workers
+        </a>
+    </div>
+</div>
+
+<!-- 📅 Month & Year History Filter Bar -->
+<div class="db-panel" style="margin-bottom: 24px; padding: 18px 24px; background: #f8fafc; border: 1px solid #e2e8f0;">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+        <h4 style="margin: 0; font-size: 1rem; color: var(--txt-dark-800);">
+            <i class="fa-solid fa-calendar-days" style="color: var(--clr-primary);"></i> 
+            Month & Year History Scope
+        </h4>
+        <form method="GET" action="{% url 'worker_detail' worker.pk %}" style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+            <div>
+                <select name="month" class="form-control" style="padding: 7px 12px; font-size: 0.88rem;" onchange="this.form.submit()">
+                    <option value="all" {% if filter_month == 'all' %}selected{% endif %}>All Months (All-Time)</option>
+                    {% for m_num, m_name in months_list %}
+                        <option value="{{ m_num }}" {% if filter_month == m_num %}selected{% endif %}>{{ m_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <select name="year" class="form-control" style="padding: 7px 12px; font-size: 0.88rem;" onchange="this.form.submit()">
+                    <option value="all" {% if filter_year == 'all' %}selected{% endif %}>All Years</option>
+                    {% for y in available_years %}
+                        <option value="{{ y }}" {% if filter_year == y|stringformat:"s" %}selected{% endif %}>{{ y }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary" style="padding: 7px 16px; font-size: 0.88rem;">
+                <i class="fa-solid fa-filter"></i> Apply Filter
+            </button>
+            {% if filter_month != 'all' or filter_year != 'all' %}
+                <a href="?month=all&year=all" class="btn btn-outline" style="padding: 7px 14px; font-size: 0.88rem;">Show All-Time</a>
+            {% endif %}
+        </form>
+    </div>
+</div>
+
+<!-- 10 Financial KPI Cards (With Gujarati Labels & Period Metrics) -->
+<h4 style="margin-bottom: 16px; font-size: 1.1rem; color: var(--txt-dark-800);">
+    <i class="fa-solid fa-calculator" style="color: var(--clr-primary);"></i> 
+    Financial Overview & Balances 
+    <span style="font-size: 0.85rem; font-weight: normal; color: var(--txt-dark-500); margin-left: 8px;">
+        ({% if filter_month != 'all' %}Filtered Period{% else %}All-Time Scope{% endif %})
+    </span>
+</h4>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 32px;">
+    <!-- 1. 💰 Salary (પગાર) -->
+    <div class="db-panel" style="padding: 16px 20px; border-left: 4px solid #3b82f6;">
+        <span style="font-size: 0.8rem; font-weight: 700; color: var(--txt-dark-500); text-transform: uppercase;">💰 Salary (પગાર)</span>
+        <div style="font-size: 1.4rem; font-weight: 700; color: var(--txt-dark-900); margin-top: 6px;">₹{{ metrics.salary|floatformat:0 }}</div>
+        <span style="font-size: 0.75rem; color: var(--txt-dark-400);">Base: ₹{{ worker.base_salary|floatformat:0 }}</span>
+    </div>
+
+    <!-- 2. 💵 Advance (એડવાન્સ) -->
+    <div class="db-panel" style="padding: 16px 20px; border-left: 4px solid #f59e0b;">
+        <span style="font-size: 0.8rem; font-weight: 700; color: var(--txt-dark-500); text-transform: uppercase;">💵 Advance (એડવાન્સ)</span>
+        <div style="font-size: 1.4rem; font-weight: 700; color: #d97706; margin-top: 6px;">₹{{ metrics.advance|floatformat:0 }}</div>
+        <span style="font-size: 0.75rem; color: var(--txt-dark-400);">Advance Given</span>
+    </div>
+
+    <!-- 3. 🏦 Cash Taken (ઉપાડ) -->
+    <div class="db-panel" style="padding: 16px 20px; border-left: 4px solid #8b5cf6;">
+        <span style="font-size: 0.8rem; font-weight: 700; color: var(--txt-dark-500); text-transform: uppercase;">🏦 Cash Taken (ઉપાડ)</span>
+        <div style="font-size: 1.4rem; font-weight: 700; color: #7c3aed; margin-top: 6px;">₹{{ metrics.cash_taken|floatformat:0 }}</div>
+        <span style="font-size: 0.75rem; color: var(--txt-dark-400);">Cash Withdrawals</span>
+    </div>
+
+    <!-- 4. 📅 Leave (રજા) -->
+    <div class="db-panel" style="padding: 16px 20px; border-left: 4px solid #64748b;">
+        <span style="font-size: 0.8rem; font-weight: 700; color: var(--txt-dark-500); text-transform: uppercase;">📅 Leave (રજા)</span>
+        <div style="font-size: 1.4rem; font-weight: 700; color: #475569; margin-top: 6px;">{{ metrics.leave }} days</div>
+        <span style="font-size: 0.75rem; color: var(--txt-dark-400);">Absent Days</span>
+    </div>
+
+    <!-- 5. 🎁 Bonus (બોનસ) -->
+    <div class="db-panel" style="padding: 16px 20px; border-left: 4px solid #10b981;">
+        <span style="font-size: 0.8rem; font-weight: 700; color: var(--txt-dark-500); text-transform: uppercase;">🎁 Bonus (બોનસ)</span>
+        <div style="font-size: 1.4rem; font-weight: 700; color: #059669; margin-top: 6px;">₹{{ metrics.bonus|floatformat:0 }}</div>
+        <span style="font-size: 0.75rem; color: var(--txt-dark-400);">Incentives Added</span>
+    </div>
+
+    <!-- 6. ➖ Deduction (કપાત) -->
+    <div class="db-panel" style="padding: 16px 20px; border-left: 4px solid #ef4444;">
+        <span style="font-size: 0.8rem; font-weight: 700; color: var(--txt-dark-500); text-transform: uppercase;">➖ Deduction (કપાત)</span>
+        <div style="font-size: 1.4rem; font-weight: 700; color: #dc2626; margin-top: 6px;">₹{{ metrics.deduction|floatformat:0 }}</div>
+        <span style="font-size: 0.75rem; color: var(--txt-dark-400);">Fine / Cut Amount</span>
+    </div>
+
+    <!-- 7. 💸 Expense (ખર્ચ) -->
+    <div class="db-panel" style="padding: 16px 20px; border-left: 4px solid #06b6d4;">
+        <span style="font-size: 0.8rem; font-weight: 700; color: var(--txt-dark-500); text-transform: uppercase;">💸 Expense (ખર્ચ)</span>
+        <div style="font-size: 1.4rem; font-weight: 700; color: #0891b2; margin-top: 6px;">₹{{ metrics.expense|floatformat:0 }}</div>
+        <span style="font-size: 0.75rem; color: var(--txt-dark-400);">Reimbursables</span>
+    </div>
+
+    <!-- 8. 📈 Income (આવક) -->
+    <div class="db-panel" style="padding: 16px 20px; border-left: 4px solid #10b981;">
+        <span style="font-size: 0.8rem; font-weight: 700; color: var(--txt-dark-500); text-transform: uppercase;">📈 Income (આવક)</span>
+        <div style="font-size: 1.4rem; font-weight: 700; color: #047857; margin-top: 6px;">₹{{ metrics.income|floatformat:0 }}</div>
+        <span style="font-size: 0.75rem; color: var(--txt-dark-400);">Extra Earnings</span>
+    </div>
+
+    <!-- 9. 💳 Payment (ચુકવણી) -->
+    <div class="db-panel" style="padding: 16px 20px; border-left: 4px solid #0284c7;">
+        <span style="font-size: 0.8rem; font-weight: 700; color: var(--txt-dark-500); text-transform: uppercase;">💳 Payment (ચુકવણી)</span>
+        <div style="font-size: 1.4rem; font-weight: 700; color: #0369a1; margin-top: 6px;">₹{{ metrics.payment|floatformat:0 }}</div>
+        <span style="font-size: 0.75rem; color: var(--txt-dark-400);">Total Settled</span>
+    </div>
+
+    <!-- 10. ⏳ Pending (બાકી) -->
+    <div class="db-panel" style="padding: 16px 20px; background: {% if metrics.pending > 0 %}rgba(239, 68, 68, 0.08){% else %}rgba(16, 185, 129, 0.08){% endif %}; border-left: 4px solid {% if metrics.pending > 0 %}#ef4444{% else %}#10b981{% endif %};">
+        <span style="font-size: 0.8rem; font-weight: 700; color: {% if metrics.pending > 0 %}#b91c1c{% else %}#047857{% endif %}; text-transform: uppercase;">⏳ Pending (બાકી)</span>
+        <div style="font-size: 1.5rem; font-weight: 800; color: {% if metrics.pending > 0 %}#dc2626{% else %}#059669{% endif %}; margin-top: 6px;">
+            ₹{{ metrics.pending|floatformat:0 }}
+        </div>
+        <span style="font-size: 0.75rem; color: var(--txt-dark-500); font-weight: 600;">
+            All-Time Total: ₹{{ metrics.all_time_pending|floatformat:0 }}
+        </span>
+    </div>
+</div>
+
+<!-- Add Transaction Entry Form Panel -->
+<div class="db-panel" style="margin-bottom: 32px;">
+    <h4 style="margin-bottom: 16px; font-size: 1.05rem; color: var(--txt-dark-800);">
+        <i class="fa-solid fa-plus-circle" style="color: var(--clr-primary);"></i> Add Financial / Leave Transaction Record
+    </h4>
+
+    <form method="POST" action="{% url 'worker_entry_add' worker.pk %}" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; align-items: end;">
+        {% csrf_token %}
+
+        <div>
+            <label style="font-size: 0.8rem; font-weight: 600; color: var(--txt-dark-500); display: block; margin-bottom: 4px;">Transaction Type</label>
+            <select name="entry_type" id="entry_type_select" class="form-control" style="padding: 8px 12px;" required onchange="toggleLeaveInput(this.value)">
+                {% for val, label in entry_form.fields.entry_type.choices %}
+                    <option value="{{ val }}">{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div id="amount_container">
+            <label style="font-size: 0.8rem; font-weight: 600; color: var(--txt-dark-500); display: block; margin-bottom: 4px;">Amount (₹)</label>
+            <input type="number" step="0.01" name="amount" value="0.00" class="form-control" style="padding: 8px 12px;">
+        </div>
+
+        <div id="leave_container" style="display: none;">
+            <label style="font-size: 0.8rem; font-weight: 600; color: var(--txt-dark-500); display: block; margin-bottom: 4px;">Leave Days (રજા)</label>
+            <input type="number" name="leave_days" value="1" min="1" class="form-control" style="padding: 8px 12px;">
+        </div>
+
+        <div>
+            <label style="font-size: 0.8rem; font-weight: 600; color: var(--txt-dark-500); display: block; margin-bottom: 4px;">Date</label>
+            <input type="date" name="date" value="{% now 'Y-m-d' %}" class="form-control" style="padding: 7px 12px;" required>
+        </div>
+
+        <div>
+            <label style="font-size: 0.8rem; font-weight: 600; color: var(--txt-dark-500); display: block; margin-bottom: 4px;">Remarks / Note</label>
+            <input type="text" name="notes" placeholder="Reason, voucher ref, etc..." class="form-control" style="padding: 8px 12px;">
+        </div>
+
+        <div>
+            <button type="submit" class="btn btn-primary" style="padding: 9px 24px; width: 100%;">
+                <i class="fa-solid fa-check"></i> Record Entry
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- Financial Ledger History Table -->
+<div class="db-panel">
+    <div class="db-panel-header">
+        <h3>
+            <i class="fa-solid fa-clock-rotate-left"></i> Financial & Leave History Ledger 
+            <span style="font-size: 0.85rem; font-weight: normal; color: var(--txt-dark-400); margin-left: 8px;">
+                ({% if filter_month != 'all' or filter_year != 'all' %}Filtered View{% else %}All History{% endif %})
+            </span>
+        </h3>
+    </div>
+
+    <div class="table-responsive">
+        <table class="db-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Transaction Type</th>
+                    <th>Amount (INR)</th>
+                    <th>Leave Count</th>
+                    <th>Notes / Remarks</th>
+                    <th>Recorded By</th>
+                    {% if user.profile.role == 'admin' %}
+                    <th style="text-align: right;">Action</th>
+                    {% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in entries %}
+                <tr>
+                    <td><strong>{{ entry.date|date:"d M Y" }}</strong></td>
+                    <td>
+                        <span class="badge badge-{% if entry.entry_type == 'salary' or entry.entry_type == 'bonus' or entry.entry_type == 'income' %}ready{% elif entry.entry_type == 'advance' or entry.entry_type == 'cash_taken' or entry.entry_type == 'deduction' %}coating{% elif entry.entry_type == 'payment' %}delivered{% else %}lapping{% endif %}">
+                            {{ entry.get_entry_type_display }}
+                        </span>
+                    </td>
+                    <td>
+                        <strong style="font-size: 0.95rem; color: {% if entry.entry_type == 'salary' or entry.entry_type == 'bonus' or entry.entry_type == 'income' or entry.entry_type == 'expense' %}var(--clr-success){% else %}var(--txt-dark-900){% endif %};">
+                            {% if entry.entry_type != 'leave' %}₹{{ entry.amount|floatformat:2 }}{% else %}-{% endif %}
+                        </strong>
+                    </td>
+                    <td>
+                        {% if entry.entry_type == 'leave' %}
+                            <span class="badge badge-received"><i class="fa-solid fa-calendar-minus"></i> {{ entry.leave_days }} Days</span>
+                        {% else %}-{% endif %}
+                    </td>
+                    <td>{{ entry.notes|default:"-" }}</td>
+                    <td><small style="color: var(--txt-dark-400);">{{ entry.created_by.username|default:"System" }}</small></td>
+                    {% if user.profile.role == 'admin' %}
+                    <td style="text-align: right;">
+                        <a href="{% url 'worker_entry_delete' entry.pk %}" class="btn btn-outline" style="padding: 4px 10px; font-size: 0.75rem; border-color: var(--clr-danger); color: var(--clr-danger);" onclick="return confirm('Delete this financial entry?');">
+                            <i class="fa-solid fa-trash"></i>
+                        </a>
+                    </td>
+                    {% endif %}
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center" style="padding: 40px; color: var(--txt-dark-400);">
+                        No financial transaction history recorded for the selected month/year filter for {{ worker.name }}.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function toggleLeaveInput(val) {
+    const leaveContainer = document.getElementById('leave_container');
+    const amountContainer = document.getElementById('amount_container');
+    if (val === 'leave') {
+        leaveContainer.style.display = 'block';
+        amountContainer.style.display = 'none';
+    } else {
+        leaveContainer.style.display = 'none';
+        amountContainer.style.display = 'block';
+    }
+}
+</script>
+{% endblock %}

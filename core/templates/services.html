@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Our Services | {{ branding.company_name }}{% endblock %}
+
+{% block content %}
+<!-- Subheader Banner -->
+<section class="section-padding" style="background: linear-gradient(135deg, var(--bg-dark-900) 0%, var(--bg-dark-800) 100%); color: white; padding: 60px 0; text-align: center;">
+    <div class="container">
+        <h1 style="color: white; font-size: 3rem; margin-bottom: 12px;">Scaife Processing Services</h1>
+        <p style="color: var(--txt-light-300); max-width: 600px; margin: 0 auto;">High-precision surface finishing and metallurgical coating solutions designed exclusively for the diamond manufacturing industry.</p>
+    </div>
+</section>
+
+<!-- Detailed Service Cards List -->
+<section class="section-padding">
+    <div class="container" style="display: flex; flex-direction: column; gap: 60px;">
+        
+        <!-- Service 1: Lapping -->
+        <div style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 48px; align-items: center;">
+            <div style="background: linear-gradient(135deg, var(--bg-dark-800), var(--bg-dark-900)); color: var(--clr-primary); height: 350px; border-radius: var(--border-radius-md); display: flex; align-items: center; justify-content: center;">
+                <i class="fa-solid fa-compact-disc" style="font-size: 6rem; animation: spin 15s linear infinite;"></i>
+            </div>
+            <div>
+                <span style="color: var(--clr-primary); font-weight: 700; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 1px;">Flatness Correction</span>
+                <h2 style="font-size: 2.25rem; margin: 10px 0 20px;">Diamond Scaife Lapping</h2>
+                <p style="margin-bottom: 20px;">Over time, the friction of polishing diamonds creates grooves, ridges, and heat scores on the surface of cast iron scaifes. This uneven surface causes vibrations, leading to micro-cracks in diamonds and incorrect polishing facets.</p>
+                <p style="margin-bottom: 20px;">Our machine lapping process grinds the plates to absolute flatness. We offer three tiers of precision lapping: Standard, Precision, and Ultra-Precision depending on your manufacturing requirements.</p>
+                
+                <h4 style="margin-bottom: 12px; font-weight: 600;">Key Benefits:</h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px;">
+                    <div style="display: flex; gap: 8px; align-items: center;"><i class="fa-solid fa-check" style="color: var(--clr-success);"></i> Restores sub-micron flatness</div>
+                    <div style="display: flex; gap: 8px; align-items: center;"><i class="fa-solid fa-check" style="color: var(--clr-success);"></i> Eliminates spindle vibrations</div>
+                    <div style="display: flex; gap: 8px; align-items: center;"><i class="fa-solid fa-check" style="color: var(--clr-success);"></i> Ensures perfect facet angles</div>
+                    <div style="display: flex; gap: 8px; align-items: center;"><i class="fa-solid fa-check" style="color: var(--clr-success);"></i> Maximizes polished yield rate</div>
+                </div>
+
+                <div style="background-color: var(--bg-light-200); padding: 16px 24px; border-radius: var(--border-radius-sm); font-size: 0.95rem;">
+                    <strong>Process:</strong> Cleaning &rarr; Runout Measurement &rarr; CNC Grinding with micro-abrasives &rarr; Verification via Optical flats &rarr; dynamic balancing check.
+                </div>
+            </div>
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid var(--bg-light-300);">
+
+        <!-- Service 2: Coating -->
+        <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 48px; align-items: center;">
+            <div>
+                <span style="color: var(--clr-secondary); font-weight: 700; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 1px;">Adhesive Enhancement</span>
+                <h2 style="font-size: 2.25rem; margin: 10px 0 20px;">Diamond Scaife Coating</h2>
+                <p style="margin-bottom: 20px;">A raw iron wheel cannot hold diamond powder. To allow polishing, scaifes must be coated with a micro-porous chemical layer that physically locks diamond grains onto the surface, creating an efficient cutting boundary.</p>
+                <p style="margin-bottom: 20px;">We apply specialized microscopic coatings under controlled temperature conditions. From standard iron-oxide finishes to premium metal-carbide and advanced **Diamond-Like Carbon (DLC)** coatings, we provide surfaces tailored for different diamond sizes and types.</p>
+                
+                <h4 style="margin-bottom: 12px; font-weight: 600;">Key Benefits:</h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px;">
+                    <div style="display: flex; gap: 8px; align-items: center;"><i class="fa-solid fa-check" style="color: var(--clr-success);"></i> Superior abrasive grain retention</div>
+                    <div style="display: flex; gap: 8px; align-items: center;"><i class="fa-solid fa-check" style="color: var(--clr-success);"></i> Extreme wear resistance (DLC)</div>
+                    <div style="display: flex; gap: 8px; align-items: center;"><i class="fa-solid fa-check" style="color: var(--clr-success);"></i> Reduced operating temperatures</div>
+                    <div style="display: flex; gap: 8px; align-items: center;"><i class="fa-solid fa-check" style="color: var(--clr-success);"></i> Multiplied coating service life</div>
+                </div>
+
+                <div style="background-color: var(--bg-light-200); padding: 16px 24px; border-radius: var(--border-radius-sm); font-size: 0.95rem;">
+                    <strong>Process:</strong> Chemical solvent degreasing &rarr; Thermal pre-conditioning &rarr; Spray coating/Vacuum deposition &rarr; Micro-pore consolidation &rarr; Thickness audit.
+                </div>
+            </div>
+            <div style="background: linear-gradient(135deg, var(--bg-dark-800), var(--bg-dark-900)); color: var(--clr-secondary); height: 350px; border-radius: var(--border-radius-md); display: flex; align-items: center; justify-content: center; order: -1;">
+                <i class="fa-solid fa-layer-group" style="font-size: 6rem; animation: pulse 3s infinite;"></i>
+            </div>
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid var(--bg-light-300);">
+
+        <!-- Service 3: Lapping & Coating -->
+        <div style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 48px; align-items: center;">
+            <div style="background: linear-gradient(135deg, var(--bg-dark-800), var(--bg-dark-900)); color: var(--clr-success); height: 350px; border-radius: var(--border-radius-md); display: flex; align-items: center; justify-content: center;">
+                <i class="fa-solid fa-arrows-spin" style="font-size: 6rem;"></i>
+            </div>
+            <div>
+                <span style="color: var(--clr-success); font-weight: 700; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 1px;">Combined Maintenance</span>
+                <h2 style="font-size: 2.25rem; margin: 10px 0 20px;">Lapping & Coating Bundle</h2>
+                <p style="margin-bottom: 20px;">For the best results, we recommend performing both lapping and coating together. Grinding the plate to perfect flatness before applying the coating ensures a uniform coating thickness across the entire diameter, avoiding soft spots and premature peeling.</p>
+                <p style="margin-bottom: 20px;">This bundle represents our most popular service. You send us your worn scaife plates, and we return them fully flat, coated to your specifications, and dynamically balanced, ready for immediate installation.</p>
+                
+                <h4 style="margin-bottom: 12px; font-weight: 600;">Key Benefits:</h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px;">
+                    <div style="display: flex; gap: 8px; align-items: center;"><i class="fa-solid fa-check" style="color: var(--clr-success);"></i> Uniform coating distribution</div>
+                    <div style="display: flex; gap: 8px; align-items: center;"><i class="fa-solid fa-check" style="color: var(--clr-success);"></i> Maximum adhesion interface</div>
+                    <div style="display: flex; gap: 8px; align-items: center;"><i class="fa-solid fa-check" style="color: var(--clr-success);"></i> Discounted package pricing</div>
+                    <div style="display: flex; gap: 8px; align-items: center;"><i class="fa-solid fa-check" style="color: var(--clr-success);"></i> Comprehensive QC clearance</div>
+                </div>
+
+                <div style="background-color: var(--bg-light-200); padding: 16px 24px; border-radius: var(--border-radius-sm); font-size: 0.95rem;">
+                    <strong>Process:</strong> Full sequence of lapping followed immediately by our thermal coating and dynamic balancing processes.
+                </div>
+            </div>
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid var(--bg-light-300);">
+
+        <!-- Service 4: Maintenance & Quality Audit -->
+        <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 48px; align-items: center;">
+            <div>
+                <span style="color: var(--clr-info); font-weight: 700; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 1px;">Quality Control</span>
+                <h2 style="font-size: 2.25rem; margin: 10px 0 20px;">Scaife Maintenance & Quality Inspection</h2>
+                <p style="margin-bottom: 20px;">Even if a plate doesn't need immediate coating, it may suffer from mechanical runout or balancing shifts due to high spinning velocities (often exceeding 3000 RPM). A minor imbalance can induce chatter marks on diamond facets.</p>
+                <p style="margin-bottom: 20px;">We run scaifes through dynamic balance testing. Using high-frequency vibration sensors, we identify point weights and add balance adjustments. We also offer spindle runout auditing and micro-pore verification.</p>
+                
+                <h4 style="margin-bottom: 12px; font-weight: 600;">Key Benefits:</h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px;">
+                    <div style="display: flex; gap: 8px; align-items: center;"><i class="fa-solid fa-check" style="color: var(--clr-success);"></i> Prevents expensive facet chipping</div>
+                    <div style="display: flex; gap: 8px; align-items: center;"><i class="fa-solid fa-check" style="color: var(--clr-success);"></i> Extends life of bench spindles</div>
+                    <div style="display: flex; gap: 8px; align-items: center;"><i class="fa-solid fa-check" style="color: var(--clr-success);"></i> Verified certification documentation</div>
+                    <div style="display: flex; gap: 8px; align-items: center;"><i class="fa-solid fa-check" style="color: var(--clr-success);"></i> Real-time vibration diagnosis</div>
+                </div>
+
+                <div style="background-color: var(--bg-light-200); padding: 16px 24px; border-radius: var(--border-radius-sm); font-size: 0.95rem;">
+                    <strong>Process:</strong> Spindle mount test &rarr; High-frequency accelerometer profile &rarr; Point weight correction &rarr; Final QC certificate release.
+                </div>
+            </div>
+            <div style="background: linear-gradient(135deg, var(--bg-dark-800), var(--bg-dark-900)); color: var(--clr-info); height: 350px; border-radius: var(--border-radius-md); display: flex; align-items: center; justify-content: center; order: -1;">
+                <i class="fa-solid fa-screwdriver-wrench" style="font-size: 6rem;"></i>
+            </div>
+        </div>
+        
+    </div>
+</section>
+{% endblock %}

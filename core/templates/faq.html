@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}FAQs | {{ branding.company_name }}{% endblock %}
+
+{% block content %}
+<!-- Subheader Banner -->
+<section class="section-padding" style="background: linear-gradient(135deg, var(--bg-dark-900) 0%, var(--bg-dark-800) 100%); color: white; padding: 60px 0; text-align: center;">
+    <div class="container">
+        <h1 style="color: white; font-size: 3rem; margin-bottom: 12px;">Frequently Asked Questions</h1>
+        <p style="color: var(--txt-light-300); max-width: 600px; margin: 0 auto;">Find immediate answers to standard questions regarding our diamond scaife lapping and coating procedures.</p>
+    </div>
+</section>
+
+<!-- FAQs Accordion List -->
+<section class="section-padding">
+    <div class="container">
+        <div class="faq-accordion">
+            {% for faq in faqs %}
+                <div class="faq-item {% if forloop.first %}active{% endif %}">
+                    <div class="faq-question">
+                        <span>{{ faq.question }}</span>
+                        <span class="faq-icon">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>{{ faq.answer }}</p>
+                    </div>
+                </div>
+            {% empty %}
+                <p class="text-center">No questions added yet.</p>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}
