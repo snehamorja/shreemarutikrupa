@@ -1728,6 +1728,16 @@ def verify_security_pin(request):
 def pwa_manifest(request):
     """Return Web App Manifest JSON for PWA & Play/App Store compatibility."""
     branding = BrandingSettings.get_solo()
+    
+    icon_src = "/static/images/icon-512.png"
+    icon_type = "image/png"
+    if branding.logo:
+        icon_src = branding.logo.url
+        icon_type = "image/png" if branding.logo.name.lower().endswith('.png') else "image/jpeg"
+    elif branding.favicon:
+        icon_src = branding.favicon.url
+        icon_type = "image/png" if branding.favicon.name.lower().endswith('.png') else "image/jpeg"
+
     manifest = {
         "name": branding.company_name,
         "short_name": "Scaife Portal",
@@ -1739,9 +1749,9 @@ def pwa_manifest(request):
         "orientation": "any",
         "icons": [
             {
-                "src": "/static/images/hero-bg.jpg",
-                "sizes": "192x192 512x512",
-                "type": "image/jpeg"
+                "src": icon_src,
+                "sizes": "512x512",
+                "type": icon_type
             }
         ]
     }
