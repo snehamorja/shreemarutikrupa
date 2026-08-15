@@ -157,9 +157,9 @@ function updateVisibilityAndCost() {
     let diaVal = parseInt(document.getElementById('id_quantity_diamond').value);
     if (isNaN(diaVal) || diaVal < 0) diaVal = 0;
 
-    const lapQty  = isLap  ? lapVal : 0;
-    const coatQty = isCoat ? coatVal : 0;
-    const diaQty  = isDia  ? diaVal : 0;
+    const lapQty  = isLap  ? (lapVal > 0 ? lapVal : 1) : 0;
+    const coatQty = isCoat ? (coatVal > 0 ? coatVal : 1) : 0;
+    const diaQty  = isDia  ? (diaVal > 0 ? diaVal : 1) : 0;
 
     const totalQty  = lapQty + coatQty + diaQty;
     const lapCost   = lapQty  * rates.lapping;
