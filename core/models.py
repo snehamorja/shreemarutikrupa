@@ -372,7 +372,7 @@ class WorkerProfile(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.name} ({self.office.name if self.office else 'No Office'})"
+        return self.name
 
     def _sum_entries(self, entry_type):
         from decimal import Decimal

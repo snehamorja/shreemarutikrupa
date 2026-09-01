@@ -117,7 +117,7 @@ class UserEditForm(forms.ModelForm):
 class WorkerProfileForm(forms.ModelForm):
     class Meta:
         model = WorkerProfile
-        fields = ['name', 'phone', 'email', 'office', 'base_salary', 'joining_date', 'notes', 'is_active']
+        fields = ['name', 'phone', 'email', 'base_salary', 'joining_date', 'notes', 'is_active']
         widgets = {
             'joining_date': forms.DateInput(attrs={'type': 'date'}),
         }

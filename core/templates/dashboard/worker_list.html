@@ -67,22 +67,14 @@
 </div>
 
 <!-- Search & Office Filter Bar -->
+<!-- Search Filter Bar -->
 <form method="GET" action="{% url 'worker_list' %}" class="filter-bar" style="margin-bottom: 24px;">
     <div class="search-input">
         <input type="text" name="q" value="{{ query }}" placeholder="Search worker by name or phone...">
     </div>
 
-    {% if user.profile.role == 'admin' %}
-    <select name="office" class="filter-select" onchange="this.form.submit()">
-        <option value="">All Offices</option>
-        {% for office in offices %}
-            <option value="{{ office.id }}" {% if filter_office == office.id|stringformat:"s" %}selected{% endif %}>{{ office.name }}</option>
-        {% endfor %}
-    </select>
-    {% endif %}
-
     <button type="submit" class="btn btn-dark" style="padding: 10px 20px;"><i class="fa-solid fa-filter"></i> Apply</button>
-    {% if query or filter_office %}
+    {% if query %}
         <a href="{% url 'worker_list' %}" class="btn btn-outline" style="padding: 10px 20px;">Clear</a>
     {% endif %}
 </form>
@@ -94,7 +86,6 @@
             <thead>
                 <tr>
                     <th>Worker Name</th>
-                    <th>Office Branch</th>
                     <th>Contact Phone</th>
                     <th>Base Salary (₹)</th>
                     <th>Total Advances (₹)</th>
@@ -112,7 +103,6 @@
                             <i class="fa-solid fa-circle-user" style="margin-right: 6px;"></i> {{ worker.name }}
                         </strong>
                     </td>
-                    <td>{{ worker.office.name|default:"Unassigned" }}</td>
                     <td>{{ worker.phone|default:"-" }}</td>
                     <td><strong>₹{{ worker.base_salary|floatformat:0 }}</strong></td>
                     <td><span style="color: var(--clr-warning);">₹{{ worker.total_advance|floatformat:0 }}</span></td>
@@ -135,7 +125,7 @@
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="9" class="text-center" style="padding: 40px; color: var(--txt-dark-400);">
+                    <td colspan="8" class="text-center" style="padding: 40px; color: var(--txt-dark-400);">
                         No worker profiles registered yet.
                     </td>
                 </tr>

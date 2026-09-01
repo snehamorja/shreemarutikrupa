@@ -32,25 +32,8 @@
             </div>
 
             <div class="form-group">
-                <label for="id_office">Assigned Office Branch</label>
-                <select name="office" id="id_office" class="form-control">
-                    <option value="">Select Office</option>
-                    {% for office in offices %}
-                        <option value="{{ office.id }}" {% if form.office.value == office.id or form.instance.office.id == office.id %}selected{% endif %}>{{ office.name }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-        </div>
-
-        <div class="form-grid-2">
-            <div class="form-group">
                 <label for="id_phone">Contact Phone Number</label>
                 <input type="text" name="phone" id="id_phone" value="{{ form.phone.value|default:'' }}" class="form-control" placeholder="+91 98765 43210">
-            </div>
-
-            <div class="form-group">
-                <label for="id_email">Email Address (Optional)</label>
-                <input type="email" name="email" id="id_email" value="{{ form.email.value|default:'' }}" class="form-control" placeholder="worker@example.com">
             </div>
         </div>
 
@@ -64,6 +47,11 @@
                 <label for="id_joining_date">Joining Date</label>
                 <input type="date" name="joining_date" id="id_joining_date" value="{{ form.joining_date.value|date:'Y-m-d'|default:'' }}" class="form-control">
             </div>
+        </div>
+
+        <div class="form-group">
+            <label for="id_email">Email Address (Optional)</label>
+            <input type="email" name="email" id="id_email" value="{{ form.email.value|default:'' }}" class="form-control" placeholder="worker@example.com">
         </div>
 
         <div class="form-group">

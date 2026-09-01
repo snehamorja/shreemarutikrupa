@@ -13,7 +13,6 @@
         <div>
             <h2 style="color: white; margin: 0; font-size: 1.6rem;">{{ worker.name }}</h2>
             <p style="color: rgba(255,255,255,0.7); font-size: 0.88rem; margin-top: 4px;">
-                <i class="fa-solid fa-building"></i> {{ worker.office.name|default:"Unassigned Office" }} &nbsp;|&nbsp;
                 <i class="fa-solid fa-phone"></i> {{ worker.phone|default:"No phone" }} &nbsp;|&nbsp;
                 <i class="fa-solid fa-calendar-check"></i> Joined: {{ worker.joining_date|date:"d M Y"|default:"N/A" }}
             </p>

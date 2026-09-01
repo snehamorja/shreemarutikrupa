@@ -1558,16 +1558,11 @@ def worker_list(request):
 
     if query:
         workers = workers.filter(name__icontains=query) | workers.filter(phone__icontains=query)
-    if filter_office:
-        workers = workers.filter(office_id=filter_office)
 
-    offices = Office.objects.all()
     from decimal import Decimal
     context = {
         'workers': workers,
-        'offices': offices,
         'query': query,
-        'filter_office': filter_office,
         'total_workers_count': workers.count(),
         'grand_total_base_salary': sum((w.base_salary for w in workers), Decimal('0')),
         'grand_total_advances': sum((w.total_advance() for w in workers), Decimal('0')),
@@ -1590,18 +1585,13 @@ def worker_create(request):
             return redirect('worker_detail', pk=worker.pk)
     else:
         form = WorkerProfileForm()
-    return render(request, 'dashboard/worker_form.html', {'form': form, 'offices': Office.objects.all()})
+    return render(request, 'dashboard/worker_form.html', {'form': form})
 
 
 @login_required
 @manager_or_admin
 def worker_detail(request, pk):
     worker = get_object_or_404(WorkerProfile, pk=pk)
-    user_profile = request.user.profile
-    if user_profile.role != 'admin' and worker.office != user_profile.office:
-        messages.error(request, "You do not have permission to view workers from other offices.")
-        return redirect('worker_list')
-
     today = datetime.date.today()
     filter_month = request.GET.get('month', str(today.month))
     filter_year  = request.GET.get('year',  str(today.year))
@@ -1700,7 +1690,7 @@ def worker_edit(request, pk):
             return redirect('worker_detail', pk=worker.pk)
     else:
         form = WorkerProfileForm(instance=worker)
-    return render(request, 'dashboard/worker_form.html', {'form': form, 'worker': worker, 'offices': Office.objects.all()})
+    return render(request, 'dashboard/worker_form.html', {'form': form, 'worker': worker})
 
 
 @login_required
