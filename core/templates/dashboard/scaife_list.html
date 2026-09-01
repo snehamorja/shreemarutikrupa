@@ -170,7 +170,30 @@
                             <div style="font-size: 0.75rem; color: #b45309; margin-top: 2px;"><i class="fa-solid fa-screwdriver-wrench"></i> {{ scaife.repair_details|truncatechars:60 }}</div>
                             {% endif %}
                         </td>
-                        <td><span class="badge badge-received"><i class="fa-solid fa-layer-group"></i> {{ scaife.quantity }} Scaife{% if scaife.quantity > 1 %}s{% endif %}</span></td>
+                        <td>
+                            {% if filter_service == 'lapping' %}
+                                <span class="badge badge-received" style="background: rgba(14,165,233,0.1); color: #0284c7; border: 1px solid #bae6fd; font-weight: 700;">
+                                    <i class="fa-solid fa-compact-disc"></i> {{ scaife.quantity_lapping|default:scaife.quantity }} Lapping
+                                </span>
+                            {% elif filter_service == 'coating' %}
+                                <span class="badge badge-received" style="background: rgba(139,92,246,0.1); color: #7c3aed; border: 1px solid #ddd6fe; font-weight: 700;">
+                                    <i class="fa-solid fa-flask"></i> {{ scaife.quantity_coating|default:scaife.quantity }} Coating
+                                </span>
+                            {% elif filter_service == 'diamond' %}
+                                <span class="badge badge-received" style="background: rgba(6,182,212,0.1); color: #0891b2; border: 1px solid #a5f3fc; font-weight: 700;">
+                                    <i class="fa-solid fa-gem"></i> {{ scaife.quantity_diamond|default:scaife.quantity }} Diamond
+                                </span>
+                            {% else %}
+                                <span class="badge badge-received"><i class="fa-solid fa-layer-group"></i> {{ scaife.quantity }} Scaife{% if scaife.quantity > 1 %}s{% endif %}</span>
+                                {% if scaife.quantity_lapping or scaife.quantity_coating or scaife.quantity_diamond %}
+                                <div style="font-size: 0.73rem; color: var(--txt-dark-500); margin-top: 3px; font-weight: 600;">
+                                    {% if scaife.service_lapping %}{{ scaife.quantity_lapping }} Lapping{% endif %}
+                                    {% if scaife.service_coating %}{% if scaife.service_lapping %} + {% endif %}{{ scaife.quantity_coating }} Coating{% endif %}
+                                    {% if scaife.service_diamond_scaife %}{% if scaife.service_lapping or scaife.service_coating %} + {% endif %}{{ scaife.quantity_diamond }} Diamond{% endif %}
+                                </div>
+                                {% endif %}
+                            {% endif %}
+                        </td>
                         <td>
                             {% if filter_service == 'lapping' %}
                                 <strong style="color: #0ea5e9; font-size: 0.88rem;"><i class="fa-solid fa-compact-disc"></i> Lapping</strong>

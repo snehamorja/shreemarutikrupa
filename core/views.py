@@ -382,10 +382,7 @@ def scaife_list(request):
         queryset = queryset.filter(client_name__icontains=query) | queryset.filter(serial_number__icontains=query)
     if filter_status:
         queryset = queryset.filter(status=filter_status)
-    if filter_office:
-        queryset = queryset.filter(assigned_office_id=filter_office)
-
-    # Apply service filter (includes entries that have this service, even if they have multiple)
+    # Apply service filter
     if filter_service == 'lapping':
         queryset = queryset.filter(service_lapping=True)
     elif filter_service == 'coating':
@@ -393,12 +390,21 @@ def scaife_list(request):
     elif filter_service == 'diamond':
         queryset = queryset.filter(service_diamond_scaife=True)
 
-    # Summary KPI totals (sum of quantities for all active/non-delivered scaifes)
+    # Summary KPI totals (sum of exact quantities per service for active scaifes)
+    def get_service_qty(entry, service):
+        if service == 'lapping':
+            return entry.quantity_lapping if (entry.service_lapping and entry.quantity_lapping > 0) else (entry.quantity if entry.service_lapping else 0)
+        elif service == 'coating':
+            return entry.quantity_coating if (entry.service_coating and entry.quantity_coating > 0) else (entry.quantity if entry.service_coating else 0)
+        elif service == 'diamond':
+            return entry.quantity_diamond if (entry.service_diamond_scaife and entry.quantity_diamond > 0) else (entry.quantity if entry.service_diamond_scaife else 0)
+        return 0
+
     active_qs = base_queryset.exclude(status='delivered')
     total_active_scaifes = sum(e.quantity for e in active_qs)
-    lapping_total = sum(e.quantity for e in active_qs if e.service_lapping)
-    coating_total = sum(e.quantity for e in active_qs if e.service_coating)
-    diamond_total = sum(e.quantity for e in active_qs if e.service_diamond_scaife)
+    lapping_total = sum(get_service_qty(e, 'lapping') for e in active_qs)
+    coating_total = sum(get_service_qty(e, 'coating') for e in active_qs)
+    diamond_total = sum(get_service_qty(e, 'diamond') for e in active_qs)
 
     # Pagination
     paginator = Paginator(queryset, 15)
