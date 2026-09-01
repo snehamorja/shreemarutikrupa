@@ -1154,7 +1154,6 @@ def backup_create(request):
         
         # SQLite copy file
         src_path = Path(settings.BASE_DIR) / 'db.sqlite3'
-        
         shutil.copy2(src_path, backup_path)
         
         log_action(
@@ -1162,9 +1161,15 @@ def backup_create(request):
             action_type="CREATE",
             model_name="DatabaseBackup",
             object_repr=backup_filename,
-            details=f"SQLite database snapshot file successfully created."
+            details=f"SQLite database snapshot file successfully created and downloaded."
         )
-        messages.success(request, f"Database backup '{backup_filename}' created successfully.")
+
+        # Auto-download the backup file immediately
+        with open(backup_path, 'rb') as fh:
+            response = HttpResponse(fh.read(), content_type="application/x-sqlite3")
+            response['Content-Disposition'] = f'attachment; filename={backup_filename}'
+            return response
+
     except Exception as e:
         messages.error(request, f"Error generating database backup: {e}")
         
@@ -1608,22 +1613,36 @@ def worker_detail(request, pk):
     from decimal import Decimal
     def stype(e): return sum((x.amount for x in qs.filter(entry_type=e)), Decimal('0.00'))
 
-    sal = stype('salary')
-    if sal == Decimal('0') and filter_month != 'all':
-        sal = Decimal(str(worker.base_salary))
+    sal = Decimal(str(worker.base_salary))
+    adv = stype('advance')
+    cash = stype('cash_taken')
+    leave_days = sum(e.leave_days for e in qs.filter(entry_type='leave'))
+    bonus = stype('bonus')
+    ded = stype('deduction')
+    exp = stype('expense')
+    pay = stype('payment')
+
+    # Total Taken/Settled by worker (Advance + Cash Taken + Direct Payment - Deduction)
+    total_taken = (adv + cash + pay) - ded
+    if total_taken < Decimal('0.00'):
+        total_taken = Decimal('0.00')
+
+    # Remaining pending salary:
+    # Pending = (Salary + Bonus + Expense) - Deductions - (Advance + Cash Taken + Payment)
+    pending = (sal + bonus + exp) - ded - (adv + cash + pay)
 
     metrics = {
-        'salary':    sal,
-        'advance':   stype('advance'),
-        'cash_taken':stype('cash_taken'),
-        'leave':     sum(e.leave_days for e in qs.filter(entry_type='leave')),
-        'bonus':     stype('bonus'),
-        'deduction': stype('deduction'),
-        'expense':   stype('expense'),
-        'income':    stype('income'),
-        'payment':   stype('payment'),
-        'pending':   (sal + stype('bonus') + stype('expense') + stype('income'))
-                      - (stype('advance') + stype('cash_taken') + stype('deduction') + stype('payment')),
+        'salary':          sal,
+        'advance':         adv,
+        'cash_taken':      cash,
+        'leave':           leave_days,
+        'bonus':           bonus,
+        'deduction':       ded,
+        'expense':         exp,
+        'payment':         total_taken,        # Total money already taken/settled (e.g. ₹7,500)
+        'gross_taken':     adv + cash + pay,   # Total payouts before deduction
+        'direct_payment':  pay,
+        'pending':         pending,            # Remaining balance (e.g. ₹3,500 in red)
         'all_time_pending': worker.pending_balance(),
     }
 
@@ -1641,6 +1660,30 @@ def worker_detail(request, pk):
         'available_years': available_years, 'months_list': months_list,
     }
     return render(request, 'dashboard/worker_detail.html', context)
+
+
+@login_required
+@admin_only
+def worker_salary_update(request, pk):
+    worker = get_object_or_404(WorkerProfile, pk=pk)
+    if request.method == 'POST':
+        new_salary = request.POST.get('base_salary')
+        if new_salary is not None:
+            try:
+                from decimal import Decimal
+                val = Decimal(str(new_salary).strip())
+                if val >= Decimal('0.00'):
+                    old_salary = worker.base_salary
+                    worker.base_salary = val
+                    worker.save()
+                    log_action(request.user, "UPDATE", "WorkerProfile", worker.name,
+                               f"Updated base salary for '{worker.name}' from ₹{old_salary} to ₹{val}.")
+                    messages.success(request, f"Worker '{worker.name}' base salary updated to ₹{val:,.2f} successfully.")
+                else:
+                    messages.error(request, "Salary amount must be a positive number.")
+            except Exception as e:
+                messages.error(request, f"Invalid salary value: {e}")
+    return redirect('worker_detail', pk=worker.pk)
 
 
 @login_required

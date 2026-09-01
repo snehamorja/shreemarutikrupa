@@ -46,6 +46,7 @@ urlpatterns = [
     path('dashboard/workers/create/', views.worker_create, name='worker_create'),
     path('dashboard/workers/<int:pk>/', views.worker_detail, name='worker_detail'),
     path('dashboard/workers/<int:pk>/edit/', views.worker_edit, name='worker_edit'),
+    path('dashboard/workers/<int:pk>/salary/update/', views.worker_salary_update, name='worker_salary_update'),
     path('dashboard/workers/<int:pk>/entry/add/', views.worker_entry_add, name='worker_entry_add'),
     path('dashboard/workers/entry/<int:pk>/delete/', views.worker_entry_delete, name='worker_entry_delete'),
 

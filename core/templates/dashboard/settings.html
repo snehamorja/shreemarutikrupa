@@ -211,6 +211,22 @@
 
 {% block extra_js %}
 <script>
+// --- Toggle password/PIN visibility ---
+function togglePass(inputId, eyeIconId) {
+    const input = document.getElementById(inputId);
+    const icon  = document.getElementById(eyeIconId);
+    if (!input || !icon) return;
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+    } else {
+        input.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+    }
+}
+
 // --- 2-step PIN match validation for settings page ---
 function checkPinMatch() {
     const pin1 = document.getElementById('id_admin_security_pin');

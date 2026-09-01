@@ -380,36 +380,35 @@ class WorkerProfile(models.Model):
 
     def total_salary(self):
         from decimal import Decimal
-        val = self._sum_entries('salary')
-        return val if val else Decimal(str(self.base_salary))
+        return Decimal(str(self.base_salary))
 
     def total_advance(self):      return self._sum_entries('advance')
     def total_cash_taken(self):   return self._sum_entries('cash_taken')
     def total_bonus(self):        return self._sum_entries('bonus')
     def total_deductions(self):   return self._sum_entries('deduction')
     def total_expenses(self):     return self._sum_entries('expense')
-    def total_income(self):       return self._sum_entries('income')
     def total_payments(self):     return self._sum_entries('payment')
+
+    def total_taken(self):
+        return self.total_advance() + self.total_cash_taken() + self.total_payments() - self.total_deductions()
 
     def total_leaves(self):
         return sum(e.leave_days for e in self.financial_entries.filter(entry_type='leave'))
 
     def pending_balance(self):
-        earnings = self.total_salary() + self.total_bonus() + self.total_expenses() + self.total_income()
-        paid_out = self.total_advance() + self.total_cash_taken() + self.total_deductions() + self.total_payments()
-        return earnings - paid_out
+        earnings = self.total_salary() + self.total_bonus() + self.total_expenses()
+        deductions_and_payouts = self.total_advance() + self.total_cash_taken() + self.total_deductions() + self.total_payments()
+        return earnings - deductions_and_payouts
 
 
 class WorkerFinancialEntry(models.Model):
     ENTRY_TYPES = [
-        ('salary',    '💰 Salary (પગાર)'),
         ('advance',   '💵 Advance (એડવાન્સ)'),
         ('cash_taken','🏦 Cash Taken (ઉપાડ)'),
         ('leave',     '📅 Leave (રજા)'),
         ('bonus',     '🎁 Bonus (બોનસ)'),
         ('deduction', '➖ Deduction (કપાત)'),
         ('expense',   '💸 Expense (ખર્ચ)'),
-        ('income',    '📈 Income (આવક)'),
         ('payment',   '💳 Payment (ચુકવણી)'),
     ]
 
