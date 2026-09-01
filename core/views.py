@@ -381,44 +381,51 @@ def scaife_list(request):
     office_obj = user_profile.office if not is_admin else None
     office_label = office_obj.name if office_obj else 'All Offices'
 
+def build_scaife_whatsapp_url(entry):
+    """Build pre-filled WhatsApp URL targeting the admin's permanent contact number."""
+    branding = BrandingSettings.get_solo()
+    admin_wp = (branding.whatsapp_number or '').strip().replace('+', '').replace(' ', '').replace('-', '')
+    from urllib.parse import quote
+    office_name = entry.assigned_office.name if entry.assigned_office else 'Factory'
+    repair_text = f"⚠️ *REPAIR NEEDED*: {entry.repair_details}" if entry.needs_repair else ""
+    services = entry.get_services_display()
+    msg_parts = [
+        f"🏭 *{office_name}*",
+        f"📦 *Scaife Entry* — {entry.received_date.strftime('%d %b %Y')}",
+        f"🔧 *Services*: {services}",
+        f"📊 *Total Quantity*: {entry.quantity} Scaife(s)",
+    ]
+    if entry.service_lapping and entry.quantity_lapping:
+        msg_parts.append(f"   • Lapping: {entry.quantity_lapping} pcs")
+    if entry.service_coating and entry.quantity_coating:
+        msg_parts.append(f"   • Coating: {entry.quantity_coating} pcs")
+    if entry.service_diamond_scaife and entry.quantity_diamond:
+        msg_parts.append(f"   • Diamond Scaife: {entry.quantity_diamond} pcs")
+    if repair_text:
+        msg_parts.append(repair_text)
+    if entry.notes:
+        msg_parts.append(f"📝 *Notes*: {entry.notes}")
+    msg_parts.append(f"💰 *Total Bill*: ₹{entry.cost:,.2f}")
+    msg = "\n".join(msg_parts)
+    encoded_msg = quote(msg)
+    return f"https://wa.me/{admin_wp}?text={encoded_msg}" if admin_wp else f"https://wa.me/?text={encoded_msg}"
+
+
     # Check for auto_wp / notify_wp param — build WhatsApp notification
     notify_entry = None
     notify_wp_url = None
     auto_open_wp = False
 
     branding = BrandingSettings.get_solo()
-    admin_wp = (branding.whatsapp_number or '').strip().replace('+', '').replace(' ', '')
+    admin_wp = (branding.whatsapp_number or '').strip().replace('+', '').replace(' ', '').replace('-', '')
 
-    # auto_wp = auto-open WhatsApp immediately on page load (after create/edit)
-    # notify_wp = show banner only (manual click)
     wp_entry_id = request.GET.get('auto_wp') or request.GET.get('notify_wp')
     auto_open_wp = bool(request.GET.get('auto_wp'))
 
     if wp_entry_id:
         notify_entry = ScaifeEntry.objects.filter(pk=wp_entry_id).first()
         if notify_entry:
-            from urllib.parse import quote
-            office_name = notify_entry.assigned_office.name if notify_entry.assigned_office else 'Factory'
-            repair_text = f'⚠️ REPAIR NEEDED: {notify_entry.repair_details}' if notify_entry.needs_repair else ''
-            services = notify_entry.get_services_display()
-            msg_parts = [
-                f"🏭 *{office_name}*",
-                f"📦 Scaife Entry — {notify_entry.received_date.strftime('%d %b %Y')}",
-                f"🔧 Services: {services}",
-                f"📊 Quantity: {notify_entry.quantity}",
-            ]
-            if notify_entry.service_lapping and notify_entry.quantity_lapping:
-                msg_parts.append(f"  • Lapping: {notify_entry.quantity_lapping} pcs")
-            if notify_entry.service_coating and notify_entry.quantity_coating:
-                msg_parts.append(f"  • Coating: {notify_entry.quantity_coating} pcs")
-            if notify_entry.service_diamond_scaife and notify_entry.quantity_diamond:
-                msg_parts.append(f"  • Diamond Scaife: {notify_entry.quantity_diamond} pcs")
-            if repair_text:
-                msg_parts.append(repair_text)
-            msg_parts.append(f"💰 Total Bill: ₹{notify_entry.cost:.2f}")
-            msg = "\n".join(msg_parts)
-            encoded_msg = quote(msg)
-            notify_wp_url = f"https://wa.me/{admin_wp}?text={encoded_msg}" if admin_wp else f"https://wa.me/?text={encoded_msg}"
+            notify_wp_url = build_scaife_whatsapp_url(notify_entry)
 
     context = {
         'scaife_entries': page_obj.object_list,
@@ -567,7 +574,8 @@ def scaife_create(request):
                 details=f"Scaife entry for '{entry.client_name}' registered (Qty: {entry.quantity}). Services: {entry.get_services_display()}. Bill: ₹{entry.cost}"
             )
             messages.success(request, f"✅ Scaife entry saved for '{entry.client_name}' — Qty: {entry.quantity}, Bill: ₹{entry.cost:.2f}")
-            return redirect(f"/dashboard/scaife/?auto_wp={entry.pk}")
+            wp_url = build_scaife_whatsapp_url(entry)
+            return redirect(wp_url)
         else:
             messages.error(request, "Failed to create entry. Please inspect the form input values.")
     else:
@@ -607,7 +615,8 @@ def scaife_edit(request, pk):
                 details=f"Scaife entry '{entry.client_name}' updated. Qty: {entry.quantity}, Bill: ₹{entry.cost}"
             )
             messages.success(request, f"✅ Scaife entry updated for '{entry.client_name}' — Bill: ₹{entry.cost:.2f}")
-            return redirect(f"/dashboard/scaife/?auto_wp={entry.pk}")
+            wp_url = build_scaife_whatsapp_url(entry)
+            return redirect(wp_url)
     else:
         form = ScaifeEntryForm(instance=entry)
 
