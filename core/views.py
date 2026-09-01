@@ -327,6 +327,36 @@ def overview(request):
     return render(request, 'dashboard/overview.html', context)
 
 
+def build_scaife_whatsapp_url(entry):
+    """Build pre-filled WhatsApp URL targeting the admin's permanent contact number."""
+    branding = BrandingSettings.get_solo()
+    admin_wp = (branding.whatsapp_number or '').strip().replace('+', '').replace(' ', '').replace('-', '')
+    from urllib.parse import quote
+    office_name = entry.assigned_office.name if entry.assigned_office else 'Factory'
+    repair_text = f"⚠️ *REPAIR NEEDED*: {entry.repair_details}" if entry.needs_repair else ""
+    services = entry.get_services_display()
+    msg_parts = [
+        f"🏭 *{office_name}*",
+        f"📦 *Scaife Entry* — {entry.received_date.strftime('%d %b %Y')}",
+        f"🔧 *Services*: {services}",
+        f"📊 *Total Quantity*: {entry.quantity} Scaife(s)",
+    ]
+    if entry.service_lapping and entry.quantity_lapping:
+        msg_parts.append(f"   • Lapping: {entry.quantity_lapping} pcs")
+    if entry.service_coating and entry.quantity_coating:
+        msg_parts.append(f"   • Coating: {entry.quantity_coating} pcs")
+    if entry.service_diamond_scaife and entry.quantity_diamond:
+        msg_parts.append(f"   • Diamond Scaife: {entry.quantity_diamond} pcs")
+    if repair_text:
+        msg_parts.append(repair_text)
+    if entry.notes:
+        msg_parts.append(f"📝 *Notes*: {entry.notes}")
+    msg_parts.append(f"💰 *Total Bill*: ₹{entry.cost:,.2f}")
+    msg = "\n".join(msg_parts)
+    encoded_msg = quote(msg)
+    return f"https://wa.me/{admin_wp}?text={encoded_msg}" if admin_wp else f"https://wa.me/?text={encoded_msg}"
+
+
 @login_required
 def scaife_list(request):
     user_profile = request.user.profile
@@ -380,36 +410,6 @@ def scaife_list(request):
     is_admin = user_profile.role == 'admin'
     office_obj = user_profile.office if not is_admin else None
     office_label = office_obj.name if office_obj else 'All Offices'
-
-def build_scaife_whatsapp_url(entry):
-    """Build pre-filled WhatsApp URL targeting the admin's permanent contact number."""
-    branding = BrandingSettings.get_solo()
-    admin_wp = (branding.whatsapp_number or '').strip().replace('+', '').replace(' ', '').replace('-', '')
-    from urllib.parse import quote
-    office_name = entry.assigned_office.name if entry.assigned_office else 'Factory'
-    repair_text = f"⚠️ *REPAIR NEEDED*: {entry.repair_details}" if entry.needs_repair else ""
-    services = entry.get_services_display()
-    msg_parts = [
-        f"🏭 *{office_name}*",
-        f"📦 *Scaife Entry* — {entry.received_date.strftime('%d %b %Y')}",
-        f"🔧 *Services*: {services}",
-        f"📊 *Total Quantity*: {entry.quantity} Scaife(s)",
-    ]
-    if entry.service_lapping and entry.quantity_lapping:
-        msg_parts.append(f"   • Lapping: {entry.quantity_lapping} pcs")
-    if entry.service_coating and entry.quantity_coating:
-        msg_parts.append(f"   • Coating: {entry.quantity_coating} pcs")
-    if entry.service_diamond_scaife and entry.quantity_diamond:
-        msg_parts.append(f"   • Diamond Scaife: {entry.quantity_diamond} pcs")
-    if repair_text:
-        msg_parts.append(repair_text)
-    if entry.notes:
-        msg_parts.append(f"📝 *Notes*: {entry.notes}")
-    msg_parts.append(f"💰 *Total Bill*: ₹{entry.cost:,.2f}")
-    msg = "\n".join(msg_parts)
-    encoded_msg = quote(msg)
-    return f"https://wa.me/{admin_wp}?text={encoded_msg}" if admin_wp else f"https://wa.me/?text={encoded_msg}"
-
 
     # Check for auto_wp / notify_wp param — build WhatsApp notification
     notify_entry = None
